@@ -26,14 +26,16 @@ type HTTPTest struct {
 
 var (
 	verbose bool
-	info    *maybeLogger
+	logger  *verboseLogger
 )
 
 func main() {
+	logger = new(verboseLogger)
+
 	// read flags
 	retries := flag.Int("r", 5, "Number of retries for HTTP requests (defaults to 5).")
 	timeElapse := flag.Int("t", 5, "Time elapse multiplier used between HTTP request retries in seconds (defaults to 5).")
-	rawCsv := flag.String("csv", "", "<url>,<headers as key1=value1&key2=value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool regex should return data>")
+	rawCsv := flag.String("csv", "", "<url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool regex should return data>")
 	jsonFile := flag.String("json", "", "Path and name of the json request file.")
 	//concurrency := flag.Int("c", 0, "Number of requests to make concurrently (defaults to 1)")
 	flag.BoolVar(&verbose, "v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
@@ -41,7 +43,6 @@ func main() {
 	flag.Parse()
 
 	var r []*HTTPTest
-	info = new(maybeLogger)
 
 	switch {
 	case len(*jsonFile) > 0:
@@ -66,6 +67,8 @@ Tests:
 			}
 		}
 		failures++
+
+		// break on the first failure if not in verbose mode
 		if !verbose {
 			break
 		}
@@ -90,7 +93,7 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 			if err == nil {
 				tmpClient.request.URL = u
 			} else {
-				info.Println(err)
+				logger.Println(err)
 			}
 		case 1:
 			setHeaders(tmpClient, v)
@@ -99,7 +102,7 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 			if err == nil {
 				tmpClient.expectedStatus = s
 			} else {
-				info.Printf("Error parsing status code: %s\n", err)
+				logger.Printf("Error parsing status code: %s\n", err)
 			}
 		case 3:
 			tmpClient.expectedType = v
@@ -107,7 +110,7 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 			if len(v) > 0 {
 				s, err := regexp.Compile(v)
 				if err != nil {
-					info.Printf("Error parsing regular expression: %s\n", err)
+					logger.Printf("Error parsing regular expression: %s\n", err)
 				} else {
 					tmpClient.regex = s
 				}
@@ -116,17 +119,13 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 			if len(v) > 0 {
 				s, err := strconv.ParseBool(v)
 				if err != nil {
-					info.Printf("Error parsing the boolean for whether the regex should match or not: %s\n", err)
+					logger.Printf("Error parsing the boolean for whether the regex should match or not: %s\n", err)
 				} else {
 					tmpClient.expectMatch = s
 				}
 			}
-			// add the tmpClient to the slice if it is valid
-			// if tmpClient is valid when it has a url and expected status code
-			if tmpClient.request.URL != nil &&
-				tmpClient.expectedStatus > 0 {
-				r = append(r, tmpClient)
-			}
+
+			addHTTPTest(tmpClient, r)
 
 			tmpClient = new(HTTPTest)
 
@@ -136,19 +135,33 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 		colCount++
 	}
 
+	// We'll check to see if there is an unadded tmpClient so that trailing commas aren't required.
+	if tmpClient.request != nil {
+		addHTTPTest(tmpClient, r)
+	}
+
 	return r
 }
 
+func addHTTPTest(t *HTTPTest, r []*HTTPTest) {
+	// add the tmpClient to the slice if it is valid
+	// if tmpClient is valid when it has a url and expected status code
+	if t.request.URL != nil &&
+		t.expectedStatus > 0 {
+		r = append(r, t)
+	}
+}
+
 func checkRequest(ht *HTTPTest) bool {
-	//httptest.
-	// This could/shoudl be rewritten to use http/httptest package
-	//fmt.Println(ht.request)
 	client := &http.Client{}
-	//fmt.Println(ht.request)
 	resp, err := client.Do(ht.request)
-	info.Printf("Response: %v", *resp)
+
+	logger.Printf("Request: %v", *ht.request)
+
 	if err == nil &&
 		resp.StatusCode == ht.expectedStatus {
+		logger.Printf("Response: %v", *resp)
+
 		if len(ht.expectedType) > 0 &&
 			strings.Compare(resp.Header.Get("content-type"), ht.expectedType) != 0 {
 			return false
@@ -168,9 +181,9 @@ func checkRequest(ht *HTTPTest) bool {
 	}
 
 	if err != nil {
-		info.Printf("Error on Get: %s\n", err)
+		logger.Printf("Error on Get: %s\n", err)
 	} else {
-		info.Printf("Error in response: %v\n", resp)
+		logger.Printf("Error in response: %v\n", *resp)
 	}
 	return false
 }
@@ -182,35 +195,29 @@ func setHeaders(ht *HTTPTest, h string) {
 	headers := strings.Split(h, "&")
 	ht.request.Header = make(map[string][]string)
 	for _, tmp := range headers {
-		kv := strings.Split(tmp, "=")
+		kv := strings.SplitN(tmp, ":", 2)
 
 		if len(kv) != 2 {
 			continue
 		}
 
-		// need to fix
-		k, err := url.QueryUnescape(kv[0])
-		v, err := url.QueryUnescape(kv[1])
-
-		if err == nil {
-			ht.request.Header.Set(k, v)
-		} else {
-			info.Println(err)
-		}
+		ht.request.Header.Set(kv[0], kv[1])
 	}
 }
 
-// maybeLogger only logs when the verbose variable is true. I don't like the name, but I'm tired.
-type maybeLogger struct{}
+// verboseLogger only logs when the verbose variable is true.
+type verboseLogger struct {
+	log *log.Logger
+}
 
-func (l *maybeLogger) Println(v ...interface{}) {
+func (l *verboseLogger) Println(v ...interface{}) {
 	if verbose {
-		log.Println(v)
+		l.log.Println(v)
 	}
 }
 
-func (l *maybeLogger) Printf(s string, v ...interface{}) {
+func (l *verboseLogger) Printf(s string, v ...interface{}) {
 	if verbose {
-		log.Printf(s, v)
+		l.log.Printf(s, v)
 	}
 }
