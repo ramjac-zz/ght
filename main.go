@@ -125,7 +125,7 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 				}
 			}
 
-			addHTTPTest(tmpClient, r)
+			addHTTPTest(tmpClient, &r)
 
 			tmpClient = new(HTTPTest)
 
@@ -137,18 +137,18 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 
 	// We'll check to see if there is an unadded tmpClient so that trailing commas aren't required.
 	if tmpClient.request != nil {
-		addHTTPTest(tmpClient, r)
+		addHTTPTest(tmpClient, &r)
 	}
 
 	return r
 }
 
-func addHTTPTest(t *HTTPTest, r []*HTTPTest) {
+func addHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 	// add the tmpClient to the slice if it is valid
 	// if tmpClient is valid when it has a url and expected status code
 	if t.request.URL != nil &&
 		t.expectedStatus > 0 {
-		r = append(r, t)
+		*r = append(*r, t)
 	}
 }
 
@@ -156,7 +156,7 @@ func checkRequest(ht *HTTPTest) bool {
 	client := &http.Client{}
 	resp, err := client.Do(ht.request)
 
-	logger.Printf("Request: %v", *ht.request)
+	logger.Printf("Test: %v", *ht)
 
 	if err == nil &&
 		resp.StatusCode == ht.expectedStatus {
@@ -206,18 +206,16 @@ func setHeaders(ht *HTTPTest, h string) {
 }
 
 // verboseLogger only logs when the verbose variable is true.
-type verboseLogger struct {
-	log *log.Logger
-}
+type verboseLogger struct{}
 
 func (l *verboseLogger) Println(v ...interface{}) {
 	if verbose {
-		l.log.Println(v)
+		log.Println(v)
 	}
 }
 
 func (l *verboseLogger) Printf(s string, v ...interface{}) {
 	if verbose {
-		l.log.Printf(s, v)
+		log.Printf(s, v)
 	}
 }
