@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -54,10 +55,45 @@ type headerCheck struct {
 	output http.Header
 }
 
+// This test won't work until I have a better equals check.
 func TestParseCSV(t *testing.T) {
 	// need more cases...
 	var headers = []csvCheck{
-		{"", []*HTTPTest{}},
+		{"", make([]*HTTPTest, 0, 0)},
+		{
+			"http://localhost:8080/djjff,,404",
+			[]*HTTPTest{
+				&HTTPTest{
+					request:        &http.Request{},
+					expectedStatus: 404,
+				},
+			},
+		},
+		{
+			"http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8",
+			[]*HTTPTest{
+				&HTTPTest{
+					request:        &http.Request{},
+					expectedStatus: 404,
+				},
+				&HTTPTest{
+					request:        &http.Request{},
+					expectedStatus: 200,
+					expectedType:   "text/html; charset=utf-8",
+				},
+			},
+		},
+		{
+			"http://localhost:8080,,200,,Goblet,true",
+			[]*HTTPTest{
+				&HTTPTest{
+					request:        &http.Request{},
+					expectedStatus: 200,
+					regex:          regexp.MustCompile("Goblet"),
+					expectMatch:    true,
+				},
+			},
+		},
 	}
 
 	for _, h := range headers {
@@ -66,7 +102,12 @@ func TestParseCSV(t *testing.T) {
 		ht = parseCSV(&h.input)
 
 		if !reflect.DeepEqual(ht, h.output) {
-			t.Errorf("CSV parsing failure for input: %s", h.input)
+			t.Errorf(
+				"CSV parsing failure for input: %s\nExpected: %v\nActual: %v",
+				h.input,
+				h.output,
+				ht,
+			)
 		}
 	}
 }
