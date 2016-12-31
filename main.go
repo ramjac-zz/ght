@@ -24,6 +24,22 @@ type HTTPTest struct {
 	expectMatch    bool
 }
 
+func (h *HTTPTest) String() string {
+	f := `URL: %s
+	Expected Status: %v
+	Expected Type: %s
+	Regex: %s
+	Should Regex Match: %t`
+	return fmt.Sprintf(
+		f,
+		h.request.URL,
+		h.expectedStatus,
+		h.expectedType,
+		h.regex,
+		h.expectMatch,
+	)
+}
+
 var (
 	verbose bool
 	logger  *verboseLogger
@@ -156,7 +172,7 @@ func checkRequest(ht *HTTPTest) bool {
 	client := &http.Client{}
 	resp, err := client.Do(ht.request)
 
-	logger.Printf("Test: %v", *ht)
+	logger.Printf("Test - %v", ht)
 
 	if err == nil &&
 		resp.StatusCode == ht.expectedStatus {
