@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -41,16 +42,17 @@ func (h *HTTPTest) String() string {
 }
 
 var (
-	verbose bool
-	logger  *verboseLogger
+	verbose                       bool
+	retries, timeElapse, failures int
+	logger                        *verboseLogger
 )
 
 func main() {
 	logger = new(verboseLogger)
 
 	// read flags
-	retries := flag.Int("r", 5, "Number of retries for HTTP requests (defaults to 5).")
-	timeElapse := flag.Int("t", 5, "Time elapse multiplier used between HTTP request retries in seconds (defaults to 5).")
+	flag.IntVar(&retries, "r", 5, "Number of retries for HTTP requests (defaults to 5).")
+	flag.IntVar(&timeElapse, "t", 5, "Time elapse multiplier used between HTTP request retries in seconds (defaults to 5).")
 	rawCsv := flag.String("csv", "", "<url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool regex should return data>")
 	jsonFile := flag.String("json", "", "Path and name of the json request file.")
 	//concurrency := flag.Int("c", 0, "Number of requests to make concurrently (defaults to 1)")
@@ -71,23 +73,13 @@ func main() {
 	}
 
 	// make HTTP requests
-	failures := 0
+	var wg sync.WaitGroup
+	var fm sync.Mutex
+	c := make(chan int)
 
-Tests:
+	//Tests:
 	for _, v := range r {
-		for tries := 0; tries < *retries; tries++ {
-			time.Sleep(time.Duration(*timeElapse) * time.Duration(tries) * time.Second)
-
-			if checkRequest(v) {
-				continue Tests
-			}
-		}
-		failures++
-
-		// break on the first failure if not in verbose mode
-		if !verbose {
-			break
-		}
+		go v.tryRequest(c, &fm, &wg)
 	}
 
 	// return success/failure
@@ -168,7 +160,41 @@ func addHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 	}
 }
 
-func checkRequest(ht *HTTPTest) bool {
+func (h *HTTPTest) tryRequest(quit chan int, fm *sync.Mutex, wg *sync.WaitGroup) {
+	wg.Add(1)
+
+	// Think the for needs to contain a select or be replaced by one.
+	for tries := 0; tries < retries; tries++ {
+		select {
+		case <-quit:
+			wg.Done()
+			return
+
+			// need to change this to not sleep
+			// basically it should have no case to enter until the proper time has elapsed or quit happens
+		default:
+			time.Sleep(time.Duration(timeElapse) * time.Duration(tries) * time.Second)
+
+			if h.checkRequest() {
+				//continue Tests
+				return
+			}
+		}
+	}
+
+	fm.Lock()
+	failures++
+	fm.Unlock()
+
+	// break on the first failure if not in verbose mode
+	if !verbose {
+		quit <- 1
+	}
+
+	wg.Done()
+}
+
+func (h *HTTPTest) checkRequest() bool {
 	client := &http.Client{}
 	resp, err := client.Do(ht.request)
 
@@ -205,9 +231,6 @@ func checkRequest(ht *HTTPTest) bool {
 }
 
 func setHeaders(ht *HTTPTest, h string) {
-	// Expects a string h like "accepts=application/json&bearer=blahblahblah"
-	// Values should be urlEncoded
-
 	headers := strings.Split(h, "&")
 	ht.request.Header = make(map[string][]string)
 	for _, tmp := range headers {
