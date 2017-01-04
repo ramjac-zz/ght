@@ -75,12 +75,15 @@ func main() {
 	// make HTTP requests
 	var wg sync.WaitGroup
 	var fm sync.Mutex
-	c := make(chan int)
+	c := make(chan int, 2)
 
 	//Tests:
 	for _, v := range r {
+		wg.Add(1)
 		go v.tryRequest(c, &fm, &wg)
 	}
+
+	wg.Wait()
 
 	// return success/failure
 	fmt.Println(failures)
@@ -104,7 +107,7 @@ func parseCSV(rawCSV *string) (r []*HTTPTest) {
 				logger.Println(err)
 			}
 		case 1:
-			setHeaders(tmpClient, v)
+			tmpClient.setHeaders(v)
 		case 2:
 			s, err := strconv.Atoi(v)
 			if err == nil {
@@ -161,8 +164,6 @@ func addHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 }
 
 func (h *HTTPTest) tryRequest(quit chan int, fm *sync.Mutex, wg *sync.WaitGroup) {
-	wg.Add(1)
-
 	// Think the for needs to contain a select or be replaced by one.
 	for tries := 0; tries < retries; tries++ {
 		select {
@@ -176,7 +177,7 @@ func (h *HTTPTest) tryRequest(quit chan int, fm *sync.Mutex, wg *sync.WaitGroup)
 			time.Sleep(time.Duration(timeElapse) * time.Duration(tries) * time.Second)
 
 			if h.checkRequest() {
-				//continue Tests
+				wg.Done()
 				return
 			}
 		}
@@ -196,26 +197,26 @@ func (h *HTTPTest) tryRequest(quit chan int, fm *sync.Mutex, wg *sync.WaitGroup)
 
 func (h *HTTPTest) checkRequest() bool {
 	client := &http.Client{}
-	resp, err := client.Do(ht.request)
+	resp, err := client.Do(h.request)
 
-	logger.Printf("Test - %v", ht)
+	logger.Printf("Test - %v", h)
 
 	if err == nil &&
-		resp.StatusCode == ht.expectedStatus {
+		resp.StatusCode == h.expectedStatus {
 		logger.Printf("Response: %v", *resp)
 
-		if len(ht.expectedType) > 0 &&
-			strings.Compare(resp.Header.Get("content-type"), ht.expectedType) != 0 {
+		if len(h.expectedType) > 0 &&
+			strings.Compare(resp.Header.Get("content-type"), h.expectedType) != 0 {
 			return false
 		}
 
-		if ht.regex != nil {
+		if h.regex != nil {
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(resp.Body)
 
-			m := ht.regex.MatchString(buf.String())
+			m := h.regex.MatchString(buf.String())
 
-			if m != ht.expectMatch {
+			if m != h.expectMatch {
 				return false
 			}
 		}
@@ -230,9 +231,9 @@ func (h *HTTPTest) checkRequest() bool {
 	return false
 }
 
-func setHeaders(ht *HTTPTest, h string) {
-	headers := strings.Split(h, "&")
-	ht.request.Header = make(map[string][]string)
+func (h *HTTPTest) setHeaders(headerString string) {
+	headers := strings.Split(headerString, "&")
+	h.request.Header = make(map[string][]string)
 	for _, tmp := range headers {
 		kv := strings.SplitN(tmp, ":", 2)
 
@@ -240,7 +241,7 @@ func setHeaders(ht *HTTPTest, h string) {
 			continue
 		}
 
-		ht.request.Header.Set(kv[0], kv[1])
+		h.request.Header.Set(kv[0], kv[1])
 	}
 }
 
