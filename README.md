@@ -8,6 +8,7 @@ Some examples run with godoc -http=:8080
     go run main.go -r 1 -t 1 -csv "http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8,,,http://localhost:8080,,200,,(Download go),true"
 
 Case insentive example
+
     go run main.go -v -r 1 -t 1 -csv "http://localhost:8080,,200,,(?i)(download go),true"
 
 
