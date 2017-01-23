@@ -168,12 +168,13 @@ func addHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 	}
 }
 
-func (h *HTTPTest) tryRequest(quit chan int, fm *sync.Mutex, wg *sync.WaitGroup) {
+func (h *HTTPTest) tryRequest(c chan int, fm *sync.Mutex, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	// Think the for needs to contain a select or be replaced by one.
 	for tries := 0; tries < retries; tries++ {
 		select {
-		case <-quit:
-			wg.Done()
+		case <-c:
 			return
 
 			// need to change this to not sleep
@@ -182,7 +183,6 @@ func (h *HTTPTest) tryRequest(quit chan int, fm *sync.Mutex, wg *sync.WaitGroup)
 			time.Sleep(time.Duration(timeElapse) * time.Duration(tries) * time.Second)
 
 			if h.checkRequest() {
-				wg.Done()
 				return
 			}
 		}
@@ -192,12 +192,10 @@ func (h *HTTPTest) tryRequest(quit chan int, fm *sync.Mutex, wg *sync.WaitGroup)
 	failures++
 	fm.Unlock()
 
-	// break on the first failure if not in verbose mode
+	// signal the other go routines to cancel if not in verbose mode
 	if !verbose {
-		quit <- 1
+		c <- 1
 	}
-
-	wg.Done()
 }
 
 func (h *HTTPTest) checkRequest() bool {
