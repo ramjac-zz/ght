@@ -1,7 +1,9 @@
 Go HTTP test aims to make it easy to create automated HTTP test scripts.
 
 The csv looks like this:
-"<url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool should regex match>"
+
+    <url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool should regex match>
+
 
 Some examples run with godoc -http=:8080
 
