@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -55,10 +56,13 @@ func main() {
 	flag.IntVar(&timeElapse, "t", 5, "Time elapse multiplier used between HTTP request retries in seconds (defaults to 5).")
 	rawCsv := flag.String("csv", "", "<url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool regex should return data>")
 	jsonFile := flag.String("json", "", "Path and name of the json request file.")
-	concurrency := *flag.Int("c", 1, "Number of requests to make concurrently (defaults to 1)")
+	concurrency := flag.Int("c", 1, "Number of requests to make concurrently (defaults to 1)")
 	flag.BoolVar(&verbose, "v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
 
 	flag.Parse()
+
+	// The documentation implies this is a bad solution
+	runtime.GOMAXPROCS(*concurrency)
 
 	var r []*HTTPTest
 
@@ -75,13 +79,11 @@ func main() {
 	// make HTTP requests
 	var wg sync.WaitGroup
 	var fm sync.Mutex
-	c := make(chan int, concurrency+1)
+	c := make(chan int, *concurrency+1)
 
-	//Tests:
+	// Run the requests...
 	for _, v := range r {
 		wg.Add(1)
-
-		select {}
 
 		go v.tryRequest(c, &fm, &wg)
 	}
