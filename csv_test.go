@@ -1,4 +1,4 @@
-package main
+package ght_test
 
 import (
 	"net/http"
@@ -115,7 +115,4 @@ func TestParseCSV(t *testing.T) {
 type csvCheck struct {
 	input  string
 	output []*HTTPTest
-}
-
-func TestcheckRequest(t *testing.T) {
 }
