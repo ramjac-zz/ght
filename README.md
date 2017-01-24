@@ -19,8 +19,8 @@ https://regex-golang.appspot.com/assets/html/index.html
 
  TODO
 
- * Implement concurrent requests.
- * Allow for a JSON file input of whose schema is based on an array of the http.Request struct. I'd like for there to be more flexibility in creating the requests.
- * Improve testing for CSV inputs
+ * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
+ * Improve testing
  * Improve verbose output
-
+ * Refactor to not specifically use the VerboseLogger
+ * Dockerfile?
