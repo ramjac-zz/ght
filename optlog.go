@@ -16,6 +16,7 @@ func (l *VerboseLogger) New(v *bool) {
 	verbose = v
 }
 
+// IsVerbose specifies if the logger should log human friendly output. This is nice for a program that has either human friendly verbose output or terse machine friendly return codes.
 func (l *VerboseLogger) IsVerbose() bool {
 	return *verbose
 }

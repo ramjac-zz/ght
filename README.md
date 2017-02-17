@@ -22,5 +22,7 @@ https://regex-golang.appspot.com/assets/html/index.html
  * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
  * Improve testing
  * Improve verbose output
- * Refactor to not specifically use the VerboseLogger
- * Dockerfile?
+    * The verbose output should summarize what failed. Make sure it is grep friendly.
+    * The HTTP Response in request.go should print with more line breaks.
+    * The HTTP Response in request.go should print the underlying data instead of pointers.
+

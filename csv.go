@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// ParseCSV takes a csv of the correct format and returns a slice of HTTPTest.
 func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r []*HTTPTest) {
 	tmpClient := new(HTTPTest)
 
@@ -18,13 +19,13 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 
 		switch colCount {
 		case 0:
-			tmpClient.request = new(http.Request)
-			tmpClient.retries = retries
-			tmpClient.timeElapse = timeElapse
+			tmpClient.Request = new(http.Request)
+			tmpClient.Retries = retries
+			tmpClient.TimeElapse = timeElapse
 
 			u, err := url.Parse(v)
 			if err == nil {
-				tmpClient.request.URL = u
+				tmpClient.Request.URL = u
 			} else {
 				logger.Println(err)
 			}
@@ -33,19 +34,19 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 		case 2:
 			s, err := strconv.Atoi(v)
 			if err == nil {
-				tmpClient.expectedStatus = s
+				tmpClient.ExpectedStatus = s
 			} else {
 				logger.Printf("Error parsing status code: %s\n", err)
 			}
 		case 3:
-			tmpClient.expectedType = v
+			tmpClient.ExpectedType = v
 		case 4:
 			if len(v) > 0 {
 				s, err := regexp.Compile(v)
 				if err != nil {
 					logger.Printf("Error parsing regular expression: %s\n", err)
 				} else {
-					tmpClient.regex = s
+					tmpClient.Regex = s
 				}
 			}
 		case 5:
@@ -54,7 +55,7 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 				if err != nil {
 					logger.Printf("Error parsing the boolean for whether the regex should match or not: %s\n", err)
 				} else {
-					tmpClient.expectMatch = s
+					tmpClient.ExpectMatch = s
 				}
 			}
 
@@ -69,7 +70,7 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 	}
 
 	// We'll check to see if there is an unadded tmpClient so that trailing commas aren't required.
-	if tmpClient.request != nil {
+	if tmpClient.Request != nil {
 		AddHTTPTest(tmpClient, &r)
 	}
 
@@ -78,7 +79,7 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 
 func (h *HTTPTest) setHeaders(headerString string) {
 	headers := strings.Split(headerString, "&")
-	h.request.Header = make(map[string][]string)
+	h.Request.Header = make(map[string][]string)
 	for _, tmp := range headers {
 		kv := strings.SplitN(tmp, ":", 2)
 
@@ -86,6 +87,6 @@ func (h *HTTPTest) setHeaders(headerString string) {
 			continue
 		}
 
-		h.request.Header.Set(kv[0], kv[1])
+		h.Request.Header.Set(kv[0], kv[1])
 	}
 }

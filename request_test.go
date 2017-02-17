@@ -1,12 +1,6 @@
 package ght_test
 
-import (
-	"net/http"
-	"reflect"
-	"regexp"
-	"testing"
-)
-
+import "testing"
 
 func TestcheckRequest(t *testing.T) {
 }
