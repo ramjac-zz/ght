@@ -4,7 +4,6 @@ The csv looks like this:
 
     <url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool should regex match>
 
-
 Some examples run with godoc -http=:8080
 
     go run main.go -r 1 -t 1 -csv "http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8,,,http://localhost:8080,,200,,(Download go),true"
@@ -22,7 +21,7 @@ https://regex-golang.appspot.com/assets/html/index.html
  * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
  * Improve testing
  * Improve verbose output
-    * The verbose output should summarize what failed. Make sure it is grep friendly.
+    * The verbose output should summarize what failed. Make sure it is grep friendly - what is grep friendly in this case...
     * The HTTP Response in request.go should print with more line breaks.
     * The HTTP Response in request.go should print the underlying data instead of pointers.
 

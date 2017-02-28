@@ -45,6 +45,7 @@ func main() {
 	var fm sync.Mutex
 	var failures int
 	c := make(chan int, *parallelism+1)
+	var failTests []string
 
 	// Run the requests...
 	for _, v := range r {
@@ -54,6 +55,7 @@ func main() {
 			if !v.TryRequest(logger, c, &wg) {
 				fm.Lock()
 				failures++
+				failTests = append(failTests, v.Request.URL.String())
 				fm.Unlock()
 			}
 		}(v)
@@ -62,5 +64,6 @@ func main() {
 	wg.Wait()
 
 	// return success/failure
+	logger.Println("Failing tests:", failTests)
 	fmt.Println(failures)
 }
