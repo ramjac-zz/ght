@@ -18,6 +18,8 @@ func main() {
 	timeElapse := flag.Int("t", 5, "Time elapse multiplier used between HTTP request retries in seconds (defaults to 5).")
 	rawCsv := flag.String("csv", "", "<url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool regex should return data>")
 	jsonFile := flag.String("json", "", "Path and name of the json request file.")
+	excelFile := flag.String("excel", "", "Path and name of the excel file.")
+	tabs := flag.String("tabs", "", "Tabs to test in the excel file.")
 	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make concurrently (defaults to 1)")
 	verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
 
@@ -33,6 +35,8 @@ func main() {
 	switch {
 	case len(*jsonFile) > 0:
 		log.Fatal("JSON file support not yet implemented")
+	case len(*excelFile) > 0:
+		r = ght.ImportExcel(excelFile, tabs, logger, *retries, *timeElapse)
 	case len(*rawCsv) > 0:
 		// parse csv to structs
 		r = ght.ParseCSV(rawCsv, logger, *retries, *timeElapse)

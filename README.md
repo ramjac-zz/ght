@@ -19,9 +19,11 @@ https://regex-golang.appspot.com/assets/html/index.html
  TODO
 
  * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
+ * Allow for a spreadsheet file input. A template is included in this project.
  * Improve testing
  * Improve verbose output
-    * The verbose output should summarize what failed. Make sure it is grep friendly - what is grep friendly in this case...
+    * The verbose output should summarize what failed. Make sure it is grep friendly - added summary. what is grep friendly in this case...
     * The HTTP Response in request.go should print with more line breaks.
     * The HTTP Response in request.go should print the underlying data instead of pointers.
 
+"args": ["-c","5","-r","2","-t","1","-csv","http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8,,,http://localhost:8080,,200,,Goji,true"],
