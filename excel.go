@@ -2,42 +2,46 @@ package ght
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strconv"
-
 	"strings"
 
-	"github.com/Luxurioust/excelize"
+	"github.com/tealeg/xlsx"
 )
 
 // ImportExcel takes an excel of the correct format and returns a slice of HTTPTest.
 func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, timeElapse int) (r []*HTTPTest) {
-	xlsx, err := excelize.OpenFile(*fileName)
+	xlFile, err := xlsx.OpenFile(*fileName)
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	tabs := xlsx.GetSheetMap()
-
-	for _, tab := range tabs {
+	for _, tab := range xlFile.Sheets {
 		// here is where we could check to see that the specified tab is one that was listed.
-
 		if len(*tabsToTest) > 0 {
-			if !strings.Contains(*tabsToTest, tab) {
+			logger.Println("test tabs")
+			if !strings.Contains(*tabsToTest, tab.Name) {
 				continue
 			}
 		}
 
-		// Get all the rows in a sheet.
-		rows := xlsx.GetRows(tab)
-		for _, row := range rows {
+		for _, row := range tab.Rows {
 			tmpClient := new(HTTPTest)
 			// range over the cells
-			for k, v := range row {
+			for k, v := range row.Cells {
+				if v == nil || strings.TrimSpace(v.Value) == "" {
+					if k == 1 {
+						break
+					}
+					continue
+				}
+
 				switch k {
 				case 1:
 					tmpClient.Request = new(http.Request)
@@ -46,30 +50,30 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 					tmpClient.Retries = retries
 					tmpClient.TimeElapse = timeElapse
 
-					u, err := url.Parse(v)
+					u, err := url.Parse(v.Value)
 					if err == nil {
 						tmpClient.Request.URL = u
 					} else {
 						logger.Println(err)
 					}
 				case 2:
-					tmpClient.setHeaders(v)
+					tmpClient.setExcelHeaders(v.Value)
 				case 3:
-					tmpClient.Request.Method = v
+					tmpClient.Request.Method = v.Value
 				case 4:
-					tmpClient.Request.Body.Read([]byte(v))
+					tmpClient.Request.Body = ioutil.NopCloser(strings.NewReader(v.Value))
 				case 5:
-					s, err := strconv.Atoi(v)
+					s, err := strconv.Atoi(v.Value)
 					if err == nil {
 						tmpClient.ExpectedStatus = s
 					} else {
 						logger.Printf("Error parsing status code: %s\n", err)
 					}
 				case 6:
-					tmpClient.ExpectedType = v
+					tmpClient.ExpectedType = v.Value
 				case 7:
-					if len(v) > 0 {
-						s, err := regexp.Compile(v)
+					if len(v.Value) > 0 {
+						s, err := regexp.Compile(v.Value)
 						if err != nil {
 							logger.Printf("Error parsing regular expression: %s\n", err)
 						} else {
@@ -77,8 +81,8 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 						}
 					}
 				case 8:
-					if len(v) > 0 {
-						s, err := strconv.ParseBool(v)
+					if len(v.Value) > 0 {
+						s, err := strconv.ParseBool(v.Value)
 						if err != nil {
 							logger.Printf("Error parsing the boolean for whether the regex should match or not: %s\n", err)
 						} else {
@@ -86,14 +90,14 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 						}
 					}
 				case 9:
-					s, err := strconv.Atoi(v)
+					s, err := strconv.Atoi(v.Value)
 					if err == nil {
 						tmpClient.Retries = s
 					} else {
 						logger.Printf("Error parsing retries: %s\n", err)
 					}
 				case 10:
-					s, err := strconv.Atoi(v)
+					s, err := strconv.Atoi(v.Value)
 					if err == nil {
 						tmpClient.TimeElapse = s
 					} else {
@@ -111,4 +115,18 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 		}
 	}
 	return r
+}
+
+func (h *HTTPTest) setExcelHeaders(headerString string) {
+	headers := strings.Split(headerString, "\n")
+	h.Request.Header = make(map[string][]string)
+	for _, tmp := range headers {
+		kv := strings.SplitN(tmp, ":", 2)
+
+		if len(kv) != 2 {
+			continue
+		}
+
+		h.Request.Header.Set(kv[0], strings.TrimSpace(kv[1]))
+	}
 }

@@ -30,7 +30,7 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 				logger.Println(err)
 			}
 		case 1:
-			tmpClient.setHeaders(v)
+			tmpClient.setCSVHeaders(v)
 		case 2:
 			s, err := strconv.Atoi(v)
 			if err == nil {
@@ -77,7 +77,7 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 	return r
 }
 
-func (h *HTTPTest) setHeaders(headerString string) {
+func (h *HTTPTest) setCSVHeaders(headerString string) {
 	headers := strings.Split(headerString, "&")
 	h.Request.Header = make(map[string][]string)
 	for _, tmp := range headers {

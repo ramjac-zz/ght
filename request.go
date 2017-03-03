@@ -21,13 +21,14 @@ type HTTPTest struct {
 }
 
 func (h *HTTPTest) String() string {
-	f := `URL: %s
+	f := `%s %s
 	Expected Status: %v
 	Expected Type: %s
 	Regex: %s
 	Should Regex Match: %t`
 	return fmt.Sprintf(
 		f,
+		h.Request.Method,
 		h.Request.URL,
 		h.ExpectedStatus,
 		h.ExpectedType,
