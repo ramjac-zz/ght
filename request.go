@@ -87,7 +87,7 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 		logger.Printf("Response: %v", *resp)
 
 		if len(h.ExpectedType) > 0 &&
-			strings.Compare(resp.Header.Get("content-type"), h.ExpectedType) != 0 {
+			!strings.EqualFold(resp.Header.Get("content-type"), h.ExpectedType) {
 			return false
 		}
 
@@ -103,6 +103,8 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 			m := h.Regex.MatchString(string(tmp[:]))
 
 			if m != h.ExpectMatch {
+				logger.Printf("Body: \"%s\"", string(tmp))
+
 				return false
 			}
 		}

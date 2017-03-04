@@ -62,6 +62,7 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 					tmpClient.Request.Method = v.Value
 				case 4:
 					tmpClient.Request.Body = ioutil.NopCloser(strings.NewReader(v.Value))
+					tmpClient.Request.ContentLength = int64(len(v.Value))
 				case 5:
 					s, err := strconv.Atoi(v.Value)
 					if err == nil {
@@ -70,7 +71,7 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 						logger.Printf("Error parsing status code: %s\n", err)
 					}
 				case 6:
-					tmpClient.ExpectedType = v.Value
+					tmpClient.ExpectedType = strings.TrimSpace(v.Value)
 				case 7:
 					if len(v.Value) > 0 {
 						s, err := regexp.Compile(v.Value)
