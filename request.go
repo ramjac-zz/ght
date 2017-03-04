@@ -103,8 +103,6 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 			m := h.Regex.MatchString(string(tmp[:]))
 
 			if m != h.ExpectMatch {
-				logger.Printf("Body: \"%s\"", string(tmp))
-
 				return false
 			}
 		}
