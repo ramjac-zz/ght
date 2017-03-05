@@ -112,7 +112,6 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 					continue
 				}
 			}
-			fmt.Println()
 		}
 	}
 	return r
