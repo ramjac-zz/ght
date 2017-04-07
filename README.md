@@ -33,3 +33,7 @@ https://regex-golang.appspot.com/assets/html/index.html
  * Improve verbose output
     * The verbose output should summarize what failed. There is a summary, but this could be more helpful.
     * The HTTP request and response should pretty print
+* Fix a minor bug where spreadsheet rows that lack retries/time elapse fail to run
+* Add a timeout to the test runner
+    * Implement the timeout in the excel tester
+    * Implement the timeout in the csv tester
