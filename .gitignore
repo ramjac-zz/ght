@@ -21,8 +21,6 @@ _cgo_export.*
 
 _testmain.go
 
-ght
-ght_darwin
 *.exe
 *.test
 *.prof
