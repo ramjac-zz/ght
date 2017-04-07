@@ -1,16 +1,26 @@
-Go HTTP test aims to make it easy to create automated HTTP test scripts.
+GHT (GHT HTTP Tester) aims to make it easy to create automated HTTP test scripts.
 
-The csv looks like this:
+Installation:
+
+    go get github.com/ramjac/ght/...
+
+Running an excel file looks simply like this:
+
+    ght -excel testfile.xlsx
+
+An example test file is provided in this repo. The test file works on local godoc and gotour servers. A flag -v will print verbose output.
+
+The csv test format looks like this:
 
     <url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool should regex match>
 
 Some examples run with godoc -http=:8080
 
-    go run main.go -r 1 -t 1 -csv "http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8,,,http://localhost:8080,,200,,(Download go),true"
+    ght -r 1 -t 1 -csv "http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8,,,http://localhost:8080,,200,,(Download go),true"
 
 Case insentive example
 
-    go run main.go -v -r 1 -t 1 -csv "http://localhost:8080,,200,,(?i)(download go),true"
+    ght -v -r 1 -t 1 -csv "http://localhost:8080,,200,,(?i)(download go),true"
 
 
 A nice little reference for Regex as parsed by Golang
@@ -19,11 +29,7 @@ https://regex-golang.appspot.com/assets/html/index.html
  TODO
 
  * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
- * Allow for a spreadsheet file input. A template is included in this project.
- * Improve testing
+ * Improve unit tests and examples
  * Improve verbose output
-    * The verbose output should summarize what failed. Make sure it is grep friendly - added summary. what is grep friendly in this case...
-    * The HTTP Response in request.go should print with more line breaks.
-    * The HTTP Response in request.go should print the underlying data instead of pointers.
-
-"args": ["-c","5","-r","2","-t","1","-csv","http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8,,,http://localhost:8080,,200,,Goji,true"],
+    * The verbose output should summarize what failed. There is a summary, but this could be more helpful.
+    * The HTTP request and response should pretty print
