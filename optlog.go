@@ -28,7 +28,7 @@ func (l *VerboseLogger) Println(v ...interface{}) {
 	}
 }
 
-// Printf prints a line if verbose is true.
+// Printf prints if verbose is true.
 func (l *VerboseLogger) Printf(s string, v ...interface{}) {
 	if *verbose {
 		log.Printf(s, v)
