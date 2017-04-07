@@ -1,4 +1,4 @@
-Go HTTP tester by Grady Fields
+GHT HTTP tester by Grady Fields
 
 The MIT License (MIT)
 
