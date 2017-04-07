@@ -1,7 +1,8 @@
 Go HTTP test aims to make it easy to create automated HTTP test scripts.
 
 The csv looks like this:
-"<url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool should regex match>"
+
+    <url>,<headers as key1:value1&key2:value2>,<expected HTTP status code>,<expected content type>,<regex>,<bool should regex match>
 
 Some examples run with godoc -http=:8080
 
@@ -17,8 +18,12 @@ https://regex-golang.appspot.com/assets/html/index.html
 
  TODO
 
- * Implement concurrent requests.
- * Allow for a JSON file input of whose schema is based on an array of the http.Request struct. I'd like for there to be more flexibility in creating the requests.
- * Improve testing for CSV inputs
+ * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
+ * Allow for a spreadsheet file input. A template is included in this project.
+ * Improve testing
  * Improve verbose output
+    * The verbose output should summarize what failed. Make sure it is grep friendly - added summary. what is grep friendly in this case...
+    * The HTTP Response in request.go should print with more line breaks.
+    * The HTTP Response in request.go should print the underlying data instead of pointers.
 
+"args": ["-c","5","-r","2","-t","1","-csv","http://localhost:8080/djjff,,404,,,,http://localhost:8080,,200,text/html; charset=utf-8,,,http://localhost:8080,,200,,Goji,true"],
