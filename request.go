@@ -20,6 +20,7 @@ type HTTPTest struct {
 	Retries, TimeElapse int
 }
 
+// Some basic pretty printing. This could use improvement.
 func (h *HTTPTest) String() string {
 	f := `%s %s
 	Expected Status: %v
@@ -40,18 +41,16 @@ func (h *HTTPTest) String() string {
 // AddHTTPTest appends an HTTPTest to the given slice.
 func AddHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 	// add the tmpClient to the slice if it is valid
-	// if tmpClient is valid when it has a url and expected status code
+	// tmpClient is valid when it has a url and expected status code
 	if t.Request.URL != nil &&
 		t.ExpectedStatus > 0 {
 		*r = append(*r, t)
 	}
 }
 
-// TryRequest will attempt an HTTP request as many times as specified and return true if it reaches a successful response.
+// TryRequest will attempt an HTTP request as many times as specifie and return true if it reaches a successful response.
 func (h *HTTPTest) TryRequest(logger *VerboseLogger, c chan int, wg *sync.WaitGroup) bool {
 	defer wg.Done()
-
-	// Think the for needs to contain a select or be replaced by one.
 	for tries := 0; tries < h.Retries; tries++ {
 		select {
 		case <-c:
@@ -98,7 +97,6 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 				logger.Printf("Body could not be read: %v", err)
 				return false
 			}
-			//Should I be reading the response body differently here...
 
 			m := h.Regex.MatchString(string(tmp[:]))
 
