@@ -1,8 +1,18 @@
+# GHT
+
 GHT (GHT HTTP Tester) aims to make it easy to create automated HTTP test scripts.
 
-Installation:
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Travis](https://img.shields.io/travis/rust-lang/rust.svg?style=flat-square)](https://travis-ci.org/ramjac/ght)
+[![Coverage Status](https://img.shields.io/codecov/c/github/ramjac/ght/master.svg?style=flat-square)](https://codecov.io/gh/ramjac/ght)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/ramjac/ght)
+[![Go Report Card](https://goreportcard.com/badge/github.com/caarlos0/example?style=flat-square)](https://goreportcard.com/report/github.com/ramjac/ght)
+
+## Installation:
 
     go get github.com/ramjac/ght/...
+
+## Using the tool
 
 Running an excel file looks simply like this:
 
@@ -26,10 +36,16 @@ Case insentive example
 A nice little reference for Regex as parsed by Golang
 https://regex-golang.appspot.com/assets/html/index.html
 
- TODO
+## TODO
 
  * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
  * Improve unit tests and examples
  * Improve verbose output
     * The verbose output should summarize what failed. There is a summary, but this could be more helpful.
     * The HTTP request and response should pretty print
+* Fix a minor bug where spreadsheet rows that lack retries/time elapse fail to run
+* Add a timeout to the test runner
+    * Implement the timeout in the excel tester
+    * Implement the timeout in the csv tester
+
+
