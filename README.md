@@ -38,6 +38,7 @@ https://regex-golang.appspot.com/assets/html/index.html
 
 ## TODO
 
+ * Make the HTTP client timeout configurable
  * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
  * Improve unit tests and examples
  * Improve verbose output

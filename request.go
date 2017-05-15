@@ -3,6 +3,7 @@ package ght
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -76,7 +77,17 @@ func (h *HTTPTest) TryRequest(logger *VerboseLogger, c chan int, wg *sync.WaitGr
 }
 
 func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSHandshakeTimeout:   5 * time.Second,
+			IdleConnTimeout:       5 * time.Second,
+			ResponseHeaderTimeout: 5 * time.Second,
+			Dial: (&net.Dialer{
+				Timeout: 5 * time.Second,
+			}).Dial,
+		},
+	}
 	resp, err := client.Do(h.Request)
 
 	logger.Printf("Test - %v", h)
