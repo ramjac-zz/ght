@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
@@ -124,4 +125,43 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 		logger.Printf("Error in response: %v\n", *resp)
 	}
 	return false
+}
+
+// Equals checks to see if two HTTPTests have the same field values.
+func (h *HTTPTest) Equals(c *HTTPTest) bool {
+	if h.Request != nil && c.Request != nil {
+		if !reflect.DeepEqual(h.Request.URL, c.Request.URL) {
+			return false
+		}
+		if !strings.EqualFold(h.Request.Method, c.Request.Method) {
+			return false
+		}
+		//need to check headers and body... eventually
+	}
+	// couldn't think of a better way to do this atm
+	if (h.Request == nil && c.Request != nil) || (h.Request != nil && c.Request == nil) {
+		return false
+	}
+
+	if h.ExpectedStatus != c.ExpectedStatus {
+		return false
+	}
+	if !strings.EqualFold(h.ExpectedType, c.ExpectedType) {
+		return false
+	}
+	if h.Retries != c.Retries {
+		return false
+	}
+	if h.TimeElapse != c.TimeElapse {
+		return false
+	}
+	if h.ExpectMatch != c.ExpectMatch {
+		return false
+	}
+
+	// if !strings.EqualFold(ht.Regex.String(), c.Regex.String()) {
+	// 	return false
+	// }
+
+	return true
 }

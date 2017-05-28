@@ -38,15 +38,13 @@ https://regex-golang.appspot.com/assets/html/index.html
 
 ## TODO
 
- * Make the HTTP client timeout configurable
  * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
  * Improve unit tests and examples
  * Improve verbose output
     * The verbose output should summarize what failed. There is a summary, but this could be more helpful.
     * The HTTP request and response should pretty print
 * Fix a minor bug where spreadsheet rows that lack retries/time elapse fail to run
-* Add a timeout to the test runner
+* Add a HTTP client timeout to the test runner
     * Implement the timeout in the excel tester
     * Implement the timeout in the csv tester
-
 

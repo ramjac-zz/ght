@@ -2,7 +2,6 @@ package ght_test
 
 import (
 	"net/http"
-	"reflect"
 	"regexp"
 	"testing"
 
@@ -11,18 +10,19 @@ import (
 
 // This test won't work until I have a better equals check.
 func TestParseCSV(t *testing.T) {
-	// need more cases...
-	var headers = []csvCheck{
+	var tests = []csvCheck{
 		{"", make([]*ght.HTTPTest, 0, 0)},
 		{
-			"http://localhost:8080/djjff,Accept-Ranges:bytes&Content-Length:138&Content-Type:image/gif,404",
+			"http://localhost:8080/fail404,Accept-Ranges:bytes&Content-Length:138&Content-Type:image/gif,404",
 			[]*ght.HTTPTest{
 				&ght.HTTPTest{
 					Request: &http.Request{
+						Method: http.MethodGet,
+						URL:    MustParseUrl("http://localhost:8080/fail404"),
 						Header: http.Header{
-							"Accept-Ranges":  []string{"bytes"},
-							"Content-Length": []string{"138"},
-							"Content-Type":   []string{"image/gif"},
+							"Accept-Ranges":  {"bytes"},
+							"Content-Length": {"138"},
+							"Content-Type":   {"image/gif"},
 						},
 					},
 					ExpectedStatus: 404,
@@ -30,14 +30,17 @@ func TestParseCSV(t *testing.T) {
 			},
 		},
 		{
-			"http://localhost:8080/djjff,,404,,,,http://localhost:8080,Content-Type:application/json;charset=UTF-8,200,text/html; charset=utf-8",
+			"http://localhost:8080/test2,,404,,,,http://localhost:8080,Content-Type:application/json;charset=UTF-8,200,text/html; charset=utf-8",
 			[]*ght.HTTPTest{
 				&ght.HTTPTest{
-					Request:        &http.Request{},
+					Request: &http.Request{
+						Method: http.MethodGet,
+					},
 					ExpectedStatus: 404,
 				},
 				&ght.HTTPTest{
 					Request: &http.Request{
+						Method: http.MethodGet,
 						Header: http.Header{"Content-Type": []string{"application/json;charset=UTF-8"}},
 					},
 					ExpectedStatus: 200,
@@ -50,6 +53,7 @@ func TestParseCSV(t *testing.T) {
 			[]*ght.HTTPTest{
 				&ght.HTTPTest{
 					Request: &http.Request{
+						Method: http.MethodGet,
 						Header: http.Header{
 							"Content-Encoding":            []string{"gzip"},
 							"X-Content-Type-Options":      []string{"nosniff"},
@@ -68,19 +72,28 @@ func TestParseCSV(t *testing.T) {
 	b := true
 	logger.New(&b)
 
-	for _, h := range headers {
-		var ht []*ght.HTTPTest
+	for _, test := range tests {
+		var results []*ght.HTTPTest
 
-		ht = ght.ParseCSV(&h.input, logger, 0, 0)
+		results = ght.ParseCSV(&test.input, logger, 0, 0)
 
-		// sadly always false for the test as written.
-		if !reflect.DeepEqual(ht, h.output) {
-			t.Errorf(
-				"CSV parsing failure for input: %s\nExpected: %v\nActual: %v",
-				h.input,
-				h.output,
-				ht,
-			)
+		for _, result := range results {
+			var found bool
+			for _, o := range test.output {
+				if result.Equals(o) {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				t.Errorf(
+					"CSV parsing failure for input: %s\nExpected: %v\nActual: %v",
+					test.input,
+					test.output,
+					results,
+				)
+			}
 		}
 	}
 }

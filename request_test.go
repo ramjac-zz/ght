@@ -1,6 +1,8 @@
 package ght_test
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestcheckRequest(t *testing.T) {
+func TestCheckRequest(t *testing.T) {
 }
