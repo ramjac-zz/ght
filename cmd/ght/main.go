@@ -38,10 +38,9 @@ func main() {
 	case len(*excelFile) > 0:
 		r = ght.ImportExcel(excelFile, tabs, logger, *retries, *timeElapse)
 	case len(*rawCsv) > 0:
-		// parse csv to structs
 		r = ght.ParseCSV(rawCsv, logger, *retries, *timeElapse)
 	default:
-		log.Fatal("A JSON or CSV input is required")
+		log.Fatal("An excel, JSON, or CSV input is required")
 	}
 
 	// make HTTP requests

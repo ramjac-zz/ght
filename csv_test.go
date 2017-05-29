@@ -10,6 +10,7 @@ import (
 
 // This test won't work until I have a better equals check.
 func TestParseCSV(t *testing.T) {
+	// table of tests
 	var tests = []csvCheck{
 		{"", make([]*ght.HTTPTest, 0, 0)},
 		{
@@ -71,10 +72,12 @@ func TestParseCSV(t *testing.T) {
 		},
 	}
 
+	// setup
 	var logger *ght.VerboseLogger
 	b := true
 	logger.New(&b)
 
+	// run tests
 	for _, test := range tests {
 		var results []*ght.HTTPTest
 

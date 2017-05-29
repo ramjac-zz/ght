@@ -12,6 +12,7 @@ import (
 
 // This test won't work until I have a better equals check.
 func TestImportExcel(t *testing.T) {
+	// table of tests
 	output := []*ght.HTTPTest{
 		// GET Tests
 		&ght.HTTPTest{
@@ -111,6 +112,7 @@ func TestImportExcel(t *testing.T) {
 		},
 	}
 
+	// setup
 	var logger *ght.VerboseLogger
 	b := true
 	logger.New(&b)
@@ -119,6 +121,7 @@ func TestImportExcel(t *testing.T) {
 
 	requestTests := ght.ImportExcel(&path, &tabs, logger, 2, 2)
 
+	// run tests
 	for _, o := range output {
 		var found bool
 		for _, rt := range requestTests {
@@ -135,25 +138,4 @@ func TestImportExcel(t *testing.T) {
 			)
 		}
 	}
-
-	// this should loop through the output instead of the requestTests
-	// for _, rt := range requestTests {
-	// 	var found bool
-	// 	for _, o := range output {
-	// 		if rt.Equals(o) {
-	// 			found = true
-	// 			break
-	// 		}
-	// 	}
-
-	// 	// skipping these tests for now
-	// 	if !found {
-	// 		t.Errorf(
-	// 			"Excel import failure for %s %s\nActual: %v",
-	// 			rt.Request.Method,
-	// 			rt.Request.URL.String(),
-	// 			rt,
-	// 		)
-	// 	}
-	// }
 }
