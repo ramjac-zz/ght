@@ -35,12 +35,14 @@ func TestParseCSV(t *testing.T) {
 				&ght.HTTPTest{
 					Request: &http.Request{
 						Method: http.MethodGet,
+						URL:    MustParseUrl("http://localhost:8080/test2"),
 					},
 					ExpectedStatus: 404,
 				},
 				&ght.HTTPTest{
 					Request: &http.Request{
 						Method: http.MethodGet,
+						URL:    MustParseUrl("http://localhost:8080"),
 						Header: http.Header{"Content-Type": []string{"application/json;charset=UTF-8"}},
 					},
 					ExpectedStatus: 200,
@@ -54,6 +56,7 @@ func TestParseCSV(t *testing.T) {
 				&ght.HTTPTest{
 					Request: &http.Request{
 						Method: http.MethodGet,
+						URL:    MustParseUrl("http://localhost:8080"),
 						Header: http.Header{
 							"Content-Encoding":            []string{"gzip"},
 							"X-Content-Type-Options":      []string{"nosniff"},

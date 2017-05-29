@@ -24,11 +24,11 @@ type HTTPTest struct {
 
 // Some basic pretty printing. This could use improvement.
 func (h *HTTPTest) String() string {
-	f := `%s %s
+	f := `{ %s %s
 	Expected Status: %v
 	Expected Type: %s
 	Regex: %s
-	Should Regex Match: %t`
+	Should Regex Match: %t }`
 	return fmt.Sprintf(
 		f,
 		h.Request.Method,
