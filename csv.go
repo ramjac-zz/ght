@@ -20,6 +20,7 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 		switch colCount {
 		case 0:
 			tmpClient.Request = new(http.Request)
+			tmpClient.Request.Method = http.MethodGet
 			tmpClient.Retries = retries
 			tmpClient.TimeElapse = timeElapse
 
