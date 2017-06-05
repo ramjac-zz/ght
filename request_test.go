@@ -3,6 +3,7 @@ package ght_test
 import (
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -66,7 +67,7 @@ func TestTryRequest(t *testing.T) {
 	b := false
 	logger.New(&b)
 	var wg sync.WaitGroup
-	c := make(chan int, 2)
+	c := make(chan os.Signal, 1)
 
 	// run tests
 	for _, rt := range requestTests {

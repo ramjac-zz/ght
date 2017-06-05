@@ -3,9 +3,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"runtime"
 	"sync"
 
@@ -47,15 +50,34 @@ func main() {
 	var wg sync.WaitGroup
 	var fm sync.Mutex
 	var failures int
-	c := make(chan int, *parallelism+1)
 	var failTests []string
+
+	// Handle cancellation
+	ctx := context.Background()
+	// trap Ctrl+C and call cancel on the context
+	c := make(chan os.Signal, *parallelism+1)
+	ctx, cancel := context.WithCancel(ctx)
+	signal.Notify(c, os.Interrupt)
+
+	defer func() {
+		signal.Stop(c)
+		cancel()
+	}()
+
+	go func() {
+		select {
+		case <-c:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
 
 	// Run the requests...
 	for _, v := range r {
 		wg.Add(1)
 
 		go func(v *ght.HTTPTest) {
-			if !v.TryRequest(logger, c, &wg) {
+			if !v.TryRequest(ctx, cancel, logger, &wg) {
 				fm.Lock()
 				failures++
 				failTests = append(failTests, v.Request.URL.String())
