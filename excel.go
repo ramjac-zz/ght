@@ -25,7 +25,6 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 	for _, tab := range xlFile.Sheets {
 		// here is where we could check to see that the specified tab is one that was listed.
 		if len(*tabsToTest) > 0 {
-			logger.Println("test tabs")
 			if !strings.Contains(*tabsToTest, tab.Name) {
 				continue
 			}
