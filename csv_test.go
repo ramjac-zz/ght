@@ -27,6 +27,9 @@ func TestParseCSV(t *testing.T) {
 						},
 					},
 					ExpectedStatus: 404,
+					Retries:        1,
+					TimeElapse:     1,
+					TimeOut:        1,
 				},
 			},
 		},
@@ -39,6 +42,9 @@ func TestParseCSV(t *testing.T) {
 						URL:    MustParseUrl("http://localhost:8080/test2"),
 					},
 					ExpectedStatus: 404,
+					Retries:        1,
+					TimeElapse:     1,
+					TimeOut:        1,
 				},
 				&ght.HTTPTest{
 					Request: &http.Request{
@@ -48,6 +54,9 @@ func TestParseCSV(t *testing.T) {
 					},
 					ExpectedStatus: 200,
 					ExpectedType:   "text/html; charset=utf-8",
+					Retries:        1,
+					TimeElapse:     1,
+					TimeOut:        1,
 				},
 			},
 		},
@@ -67,6 +76,9 @@ func TestParseCSV(t *testing.T) {
 					ExpectedStatus: 200,
 					Regex:          regexp.MustCompile("Goblet"),
 					ExpectMatch:    true,
+					Retries:        1,
+					TimeElapse:     1,
+					TimeOut:        1,
 				},
 			},
 		},
@@ -81,7 +93,7 @@ func TestParseCSV(t *testing.T) {
 	for _, test := range tests {
 		var results []*ght.HTTPTest
 
-		results = ght.ParseCSV(&test.input, logger, 0, 0)
+		results = ght.ParseCSV(&test.input, logger, 1, 1, 1)
 
 		for _, result := range results {
 			var found bool

@@ -1,9 +1,9 @@
 package ght_test
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -67,12 +67,15 @@ func TestTryRequest(t *testing.T) {
 	b := false
 	logger.New(&b)
 	var wg sync.WaitGroup
-	c := make(chan os.Signal, 1)
+	// Handle cancellation
+	ctx := context.Background()
+	// trap Ctrl+C and call cancel on the context
+	ctx, cancel := context.WithCancel(ctx)
 
 	// run tests
 	for _, rt := range requestTests {
 		wg.Add(1)
-		result := rt.input.TryRequest(logger, c, &wg)
+		result := rt.input.TryRequest(ctx, cancel, logger, &wg)
 
 		if result != rt.output {
 			t.Errorf(

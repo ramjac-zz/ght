@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -15,12 +14,12 @@ import (
 
 // HTTPTest is a request to be tested.
 type HTTPTest struct {
-	Request             *http.Request
-	ExpectedStatus      int
-	ExpectedType        string
-	Regex               *regexp.Regexp
-	ExpectMatch         bool
-	Retries, TimeElapse int
+	Request                      *http.Request
+	ExpectedStatus               int
+	ExpectedType                 string
+	Regex                        *regexp.Regexp
+	ExpectMatch                  bool
+	Retries, TimeElapse, TimeOut int
 }
 
 // Some basic pretty printing. This could use improvement.
@@ -77,15 +76,7 @@ func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *Verbos
 
 func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 	client := &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSHandshakeTimeout:   5 * time.Second,
-			IdleConnTimeout:       5 * time.Second,
-			ResponseHeaderTimeout: 5 * time.Second,
-			Dial: (&net.Dialer{
-				Timeout: 5 * time.Second,
-			}).Dial,
-		},
+		Timeout: (time.Duration)(h.TimeOut) * time.Second,
 	}
 	resp, err := client.Do(h.Request)
 
@@ -154,6 +145,9 @@ func (h *HTTPTest) Equals(c *HTTPTest) bool {
 		return false
 	}
 	if h.ExpectMatch != c.ExpectMatch {
+		return false
+	}
+	if h.TimeOut != c.TimeOut {
 		return false
 	}
 
