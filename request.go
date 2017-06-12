@@ -76,7 +76,7 @@ func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *Verbos
 
 func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 	client := &http.Client{
-		Timeout: (time.Duration)(h.TimeOut) * time.Second,
+		Timeout: (time.Duration)(h.TimeOut) * time.Millisecond,
 	}
 	resp, err := client.Do(h.Request)
 

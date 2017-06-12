@@ -22,7 +22,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectedStatus: 200,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        2,
+			TimeOut:        750,
 		},
 		&ght.HTTPTest{
 			Request: &http.Request{
@@ -35,7 +35,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectedStatus: 200,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        2,
+			TimeOut:        750,
 		},
 		&ght.HTTPTest{
 			Request: &http.Request{
@@ -51,7 +51,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectMatch:    true,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        2,
+			TimeOut:        750,
 		},
 		// POST Tests
 		&ght.HTTPTest{
@@ -64,7 +64,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectedStatus: 200,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        2,
+			TimeOut:        750,
 		},
 		&ght.HTTPTest{
 			Request: &http.Request{
@@ -87,7 +87,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectedStatus: 200,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        2,
+			TimeOut:        750,
 		},
 		&ght.HTTPTest{
 			Request: &http.Request{
@@ -113,7 +113,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectMatch:    true,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        2,
+			TimeOut:        750,
 		},
 	}
 

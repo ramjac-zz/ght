@@ -30,6 +30,7 @@ func TestTryRequest(t *testing.T) {
 				ExpectMatch:    true,
 				Retries:        2,
 				TimeElapse:     2,
+				TimeOut:        750,
 			},
 			output: true,
 		},
@@ -57,6 +58,7 @@ func TestTryRequest(t *testing.T) {
 				ExpectMatch:    true,
 				Retries:        2,
 				TimeElapse:     2,
+				TimeOut:        750,
 			},
 			output: true,
 		},
@@ -71,6 +73,7 @@ func TestTryRequest(t *testing.T) {
 	ctx := context.Background()
 	// trap Ctrl+C and call cancel on the context
 	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	// run tests
 	for _, rt := range requestTests {
