@@ -113,14 +113,25 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 						tmpClient.TimeOut = timeOut
 						logger.Printf("Error parsing time elapse: %s\n", err)
 					}
-
-					AddHTTPTest(tmpClient, &r)
-
-					tmpClient = new(HTTPTest)
-
-					continue
 				}
 			}
+
+			if tmpClient.Retries < 1 {
+				tmpClient.Retries = retries
+			}
+
+			if tmpClient.TimeElapse < 1 {
+				tmpClient.TimeElapse = timeElapse
+			}
+
+			if tmpClient.TimeOut < 1 {
+				tmpClient.TimeOut = timeOut
+			}
+
+			if tmpClient.Request != nil {
+				AddHTTPTest(tmpClient, &r)
+			}
+			tmpClient = new(HTTPTest)
 		}
 	}
 	return r

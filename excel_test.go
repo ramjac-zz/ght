@@ -51,7 +51,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectMatch:    true,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        750,
+			TimeOut:        400,
 		},
 		// POST Tests
 		&ght.HTTPTest{
@@ -64,7 +64,7 @@ func TestImportExcel(t *testing.T) {
 			ExpectedStatus: 200,
 			Retries:        2,
 			TimeElapse:     2,
-			TimeOut:        750,
+			TimeOut:        400,
 		},
 		&ght.HTTPTest{
 			Request: &http.Request{
@@ -124,7 +124,7 @@ func TestImportExcel(t *testing.T) {
 	path := "godocExample.xlsx"
 	tabs := ""
 
-	requestTests := ght.ImportExcel(&path, &tabs, logger, 2, 2, 2)
+	requestTests := ght.ImportExcel(&path, &tabs, logger, 2, 2, 400)
 
 	// run tests
 	for _, o := range output {
