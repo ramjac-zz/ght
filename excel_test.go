@@ -118,7 +118,7 @@ func TestImportExcel(t *testing.T) {
 	}
 
 	// setup
-	var logger *ght.VerboseLogger
+	var logger *ght.OptionalLogger
 	b := true
 	logger.New(&b)
 	path := "godocExample.xlsx"

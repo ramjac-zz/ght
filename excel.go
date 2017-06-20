@@ -14,7 +14,7 @@ import (
 )
 
 // ImportExcel takes an excel of the correct format and returns a slice of HTTPTest.
-func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, timeElapse, timeOut int) (r []*HTTPTest) {
+func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, timeElapse, timeOut int) (r []*HTTPTest) {
 	xlFile, err := xlsx.OpenFile(*fileName)
 
 	if err != nil {

@@ -65,7 +65,7 @@ func TestTryRequest(t *testing.T) {
 	}
 
 	// setup
-	var logger *ght.VerboseLogger
+	var logger *ght.OptionalLogger
 	b := false
 	logger.New(&b)
 	var wg sync.WaitGroup

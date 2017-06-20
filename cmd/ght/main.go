@@ -27,7 +27,7 @@ func main() {
 	verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
 
 	flag.Parse()
-	var logger *ght.VerboseLogger
+	var logger *ght.OptionalLogger
 	logger.New(verbose)
 
 	// The documentation implies this is a bad solution

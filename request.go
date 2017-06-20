@@ -51,7 +51,7 @@ func AddHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 }
 
 // TryRequest will attempt an HTTP request as many times as specifie and return true if it reaches a successful response.
-func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *VerboseLogger, wg *sync.WaitGroup) bool {
+func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *OptionalLogger, wg *sync.WaitGroup) bool {
 	defer wg.Done()
 	for tries := 0; tries < h.Retries; tries++ {
 		select {
@@ -74,7 +74,7 @@ func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *Verbos
 	return false
 }
 
-func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
+func (h *HTTPTest) checkRequest(logger *OptionalLogger) bool {
 	client := &http.Client{
 		Timeout: (time.Duration)(h.TimeOut) * time.Millisecond,
 	}
