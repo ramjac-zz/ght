@@ -14,13 +14,15 @@ import (
 )
 
 // ImportExcel takes an excel of the correct format and returns a slice of HTTPTest.
-func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, timeElapse, timeOut int) (r []*HTTPTest) {
+func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, timeElapse, timeOut int) (r [][]*HTTPTest) {
 	xlFile, err := xlsx.OpenFile(*fileName)
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	r = make([][]*HTTPTest, 1)
 
 	for _, tab := range xlFile.Sheets {
 		// here is where we could check to see that the specified tab is one that was listed.
@@ -29,6 +31,7 @@ func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, 
 				continue
 			}
 		}
+		var tmpRow []*HTTPTest
 
 		for _, row := range tab.Rows {
 			tmpClient := new(HTTPTest)
@@ -129,10 +132,11 @@ func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, 
 			}
 
 			if tmpClient.Request != nil {
-				AddHTTPTest(tmpClient, &r)
+				AddHTTPTest(tmpClient, &tmpRow)
 			}
 			tmpClient = new(HTTPTest)
 		}
+		r = append(r, tmpRow)
 	}
 	return r
 }

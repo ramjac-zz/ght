@@ -33,7 +33,7 @@ func main() {
 	// The documentation implies this is a bad solution
 	runtime.GOMAXPROCS(*parallelism)
 
-	var r []*ght.HTTPTest
+	var r [][]*ght.HTTPTest
 
 	switch {
 	case len(*jsonFile) > 0:
@@ -41,7 +41,8 @@ func main() {
 	case len(*excelFile) > 0:
 		r = ght.ImportExcel(excelFile, tabs, logger, *retries, *timeElapse, *timeOut)
 	case len(*rawCsv) > 0:
-		r = ght.ParseCSV(rawCsv, logger, *retries, *timeElapse, *timeOut)
+		r = make([][]*ght.HTTPTest, 1)
+		r[0] = ght.ParseCSV(rawCsv, logger, *retries, *timeElapse, *timeOut)
 	default:
 		log.Fatal("An excel, JSON, or CSV input is required")
 	}
@@ -75,12 +76,14 @@ func main() {
 	for _, v := range r {
 		wg.Add(1)
 
-		go func(v *ght.HTTPTest) {
-			if !v.TryRequest(ctx, cancel, logger, &wg) {
-				fm.Lock()
-				failures++
-				failTests = append(failTests, v.Request.URL.String())
-				fm.Unlock()
+		go func(v []*ght.HTTPTest) {
+			for _, h := range v {
+				if !h.TryRequest(ctx, cancel, logger, &wg) {
+					fm.Lock()
+					failures++
+					failTests = append(failTests, h.Request.URL.String())
+					fm.Unlock()
+				}
 			}
 		}(v)
 	}
