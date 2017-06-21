@@ -129,10 +129,12 @@ func TestImportExcel(t *testing.T) {
 	// run tests
 	for _, o := range output {
 		var found bool
-		for _, rt := range requestTests[0] {
-			if rt.Equals(o) {
-				found = true
-				break
+		for _, tab := range requestTests {
+			for _, rt := range tab {
+				if rt.Equals(o) {
+					found = true
+					break
+				}
 			}
 		}
 

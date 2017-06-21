@@ -22,9 +22,9 @@ func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, 
 		os.Exit(1)
 	}
 
-	r = make([][]*HTTPTest, 1)
+	r = make([][]*HTTPTest, len(xlFile.Sheets))
 
-	for _, tab := range xlFile.Sheets {
+	for k, tab := range xlFile.Sheets {
 		// here is where we could check to see that the specified tab is one that was listed.
 		if len(*tabsToTest) > 0 {
 			if !strings.Contains(*tabsToTest, tab.Name) {
@@ -119,6 +119,7 @@ func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, 
 				}
 			}
 
+			// set defaults if no value is provided
 			if tmpClient.Retries < 1 {
 				tmpClient.Retries = retries
 			}
@@ -136,7 +137,8 @@ func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, 
 			}
 			tmpClient = new(HTTPTest)
 		}
-		r = append(r, tmpRow)
+
+		r[k] = tmpRow
 	}
 	return r
 }
