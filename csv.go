@@ -9,7 +9,7 @@ import (
 )
 
 // ParseCSV takes a csv of the correct format and returns a slice of HTTPTest.
-func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r []*HTTPTest) {
+func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse, timeOut int) (r []*HTTPTest) {
 	tmpClient := new(HTTPTest)
 
 	colCount := 0
@@ -20,8 +20,10 @@ func ParseCSV(rawCSV *string, logger *VerboseLogger, retries, timeElapse int) (r
 		switch colCount {
 		case 0:
 			tmpClient.Request = new(http.Request)
+			tmpClient.Request.Method = http.MethodGet
 			tmpClient.Retries = retries
 			tmpClient.TimeElapse = timeElapse
+			tmpClient.TimeOut = timeOut
 
 			u, err := url.Parse(v)
 			if err == nil {

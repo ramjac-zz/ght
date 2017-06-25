@@ -1,9 +1,11 @@
 package ght
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
@@ -12,21 +14,21 @@ import (
 
 // HTTPTest is a request to be tested.
 type HTTPTest struct {
-	Request             *http.Request
-	ExpectedStatus      int
-	ExpectedType        string
-	Regex               *regexp.Regexp
-	ExpectMatch         bool
-	Retries, TimeElapse int
+	Request                      *http.Request
+	ExpectedStatus               int
+	ExpectedType                 string
+	Regex                        *regexp.Regexp
+	ExpectMatch                  bool
+	Retries, TimeElapse, TimeOut int
 }
 
 // Some basic pretty printing. This could use improvement.
 func (h *HTTPTest) String() string {
-	f := `%s %s
+	f := `{ %s %s
 	Expected Status: %v
 	Expected Type: %s
 	Regex: %s
-	Should Regex Match: %t`
+	Should Regex Match: %t }`
 	return fmt.Sprintf(
 		f,
 		h.Request.Method,
@@ -49,18 +51,13 @@ func AddHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 }
 
 // TryRequest will attempt an HTTP request as many times as specifie and return true if it reaches a successful response.
-func (h *HTTPTest) TryRequest(logger *VerboseLogger, c chan int, wg *sync.WaitGroup) bool {
+func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *VerboseLogger, wg *sync.WaitGroup) bool {
 	defer wg.Done()
 	for tries := 0; tries < h.Retries; tries++ {
 		select {
-		case <-c:
+		case <-ctx.Done():
 			return true
-
-			// need to change this to not sleep
-			// basically it should have no case to enter until the proper time has elapsed or quit happens
-		default:
-			time.Sleep(time.Duration(h.TimeElapse) * time.Duration(tries) * time.Second)
-
+		case <-time.After(time.Duration(h.TimeElapse) * time.Duration(tries) * time.Second):
 			if h.checkRequest(logger) {
 				return true
 			}
@@ -69,14 +66,16 @@ func (h *HTTPTest) TryRequest(logger *VerboseLogger, c chan int, wg *sync.WaitGr
 
 	// signal the other go routines to cancel if not in verbose mode
 	if !logger.IsVerbose() {
-		c <- 1
+		cancel()
 	}
 
 	return false
 }
 
 func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: (time.Duration)(h.TimeOut) * time.Millisecond,
+	}
 	resp, err := client.Do(h.Request)
 
 	logger.Printf("Test - %v", h)
@@ -113,4 +112,46 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 		logger.Printf("Error in response: %v\n", *resp)
 	}
 	return false
+}
+
+// Equals checks to see if two HTTPTests have the same field values.
+func (h *HTTPTest) Equals(c *HTTPTest) bool {
+	if h.Request != nil && c.Request != nil {
+		if !reflect.DeepEqual(h.Request.URL, c.Request.URL) {
+			return false
+		}
+		if !strings.EqualFold(h.Request.Method, c.Request.Method) {
+			return false
+		}
+		//need to check headers and body... eventually
+	}
+	// couldn't think of a better way to do this atm
+	if (h.Request == nil && c.Request != nil) || (h.Request != nil && c.Request == nil) {
+		return false
+	}
+
+	if h.ExpectedStatus != c.ExpectedStatus {
+		return false
+	}
+	if !strings.EqualFold(h.ExpectedType, c.ExpectedType) {
+		return false
+	}
+	if h.Retries != c.Retries {
+		return false
+	}
+	if h.TimeElapse != c.TimeElapse {
+		return false
+	}
+	if h.ExpectMatch != c.ExpectMatch {
+		return false
+	}
+	if h.TimeOut != c.TimeOut {
+		return false
+	}
+
+	// if !strings.EqualFold(ht.Regex.String(), c.Regex.String()) {
+	// 	return false
+	// }
+
+	return true
 }
