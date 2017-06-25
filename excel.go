@@ -14,7 +14,7 @@ import (
 )
 
 // ImportExcel takes an excel of the correct format and returns a slice of HTTPTest.
-func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, timeElapse int) (r []*HTTPTest) {
+func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, timeElapse, timeOut int) (r []*HTTPTest) {
 	xlFile, err := xlsx.OpenFile(*fileName)
 
 	if err != nil {
@@ -91,16 +91,26 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 					}
 				case 9:
 					s, err := strconv.Atoi(v.Value)
-					if err == nil {
+					if err == nil && s > 0 {
 						tmpClient.Retries = s
 					} else {
+						tmpClient.Retries = retries
 						logger.Printf("Error parsing retries: %s\n", err)
 					}
 				case 10:
 					s, err := strconv.Atoi(v.Value)
-					if err == nil {
+					if err == nil && s > 0 {
 						tmpClient.TimeElapse = s
 					} else {
+						tmpClient.TimeElapse = timeElapse
+						logger.Printf("Error parsing time elapse: %s\n", err)
+					}
+				case 11:
+					s, err := strconv.Atoi(v.Value)
+					if err == nil && s > 0 {
+						tmpClient.TimeOut = s
+					} else {
+						tmpClient.TimeOut = timeOut
 						logger.Printf("Error parsing time elapse: %s\n", err)
 					}
 
