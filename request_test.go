@@ -75,7 +75,7 @@ func TestTryRequest(t *testing.T) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// run tests
+	// TODO - rewrite so that this verifies that each test is on the correct tab
 	for _, rt := range requestTests {
 		wg.Add(1)
 		result := rt.input.TryRequest(ctx, cancel, logger, &wg)

@@ -1,4 +1,3 @@
-// optlog is just a logger with 2 levels.
 package ght
 
 import "log"
