@@ -57,9 +57,7 @@ func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *Option
 		select {
 		case <-ctx.Done():
 			return true
-		default:
-			time.Sleep(time.Duration(h.TimeElapse) * time.Duration(tries) * time.Second)
-
+		case <-time.After(time.Duration(h.TimeElapse) * time.Duration(tries) * time.Second):
 			if h.checkRequest(logger) {
 				return true
 			}
