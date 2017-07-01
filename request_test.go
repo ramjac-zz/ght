@@ -77,6 +77,8 @@ func TestTryRequest(t *testing.T) {
 
 	// TODO - rewrite so that this verifies that each test is on the correct tab
 	for _, rt := range requestTests {
+		t.Logf("Running test %v", rt)
+
 		wg.Add(1)
 		result := rt.input.TryRequest(ctx, cancel, logger, &wg)
 

@@ -91,6 +91,8 @@ func TestParseCSV(t *testing.T) {
 
 	// run tests
 	for _, test := range tests {
+		t.Logf("Searching for test output %v", test)
+
 		var results []*ght.HTTPTest
 
 		results = ght.ParseCSV(&test.input, logger, 1, 1, 1)

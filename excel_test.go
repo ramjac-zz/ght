@@ -128,6 +128,8 @@ func TestImportExcel(t *testing.T) {
 
 	// run tests
 	for _, o := range output {
+		t.Logf("Searching for ouput %v", o)
+
 		var found bool
 		for _, tab := range requestTests {
 			for _, rt := range tab {
