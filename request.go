@@ -20,6 +20,7 @@ type HTTPTest struct {
 	Regex                        *regexp.Regexp
 	ExpectMatch                  bool
 	Retries, TimeElapse, TimeOut int
+	authHeaders                  *http.Header
 }
 
 // Some basic pretty printing. This could use improvement.
@@ -154,4 +155,23 @@ func (h *HTTPTest) Equals(c *HTTPTest) bool {
 	// }
 
 	return true
+}
+
+func (h *HTTPTest) getAuthHeaders(r *http.Response) (header *http.Header) {
+	for k, v := range r.Header {
+		_, found := (*h.authHeaders)[k]
+		if found {
+			(*header)[k] = v
+		}
+	}
+
+	return
+}
+
+func (h *HTTPTest) setAuthHeaders() {
+	for k, v := range *h.authHeaders {
+		if len(v) > 0 {
+			h.Request.Header[k] = v
+		}
+	}
 }
