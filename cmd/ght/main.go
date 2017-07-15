@@ -24,12 +24,13 @@ func main() {
 	excelFile := flag.String("excel", "", "Path and name of the excel file.")
 	tabs := flag.String("tabs", "", "Tabs to test in the excel file.")
 	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make concurrently (defaults to 1)")
-	//verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
+	verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
 
 	flag.Parse()
-	logger := log.New(os.Stdout, "GHT: ", log.Lshortfile)
-	// var logger *ght.OptionalLogger
-	// logger.New(verbose)
+	opt := new(ght.OptionalLogger)
+	opt.New(verbose)
+	logger := log.New(opt, "GHT: ", log.Lshortfile)
+	//logger := log.New(os.Stdout, "GHT: ", log.Lshortfile)
 
 	// The documentation implies this is a bad solution
 	runtime.GOMAXPROCS(*parallelism)
