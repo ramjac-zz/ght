@@ -1,6 +1,7 @@
 package ght
 
 import (
+	"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -9,7 +10,7 @@ import (
 )
 
 // ParseCSV takes a csv of the correct format and returns a slice of HTTPTest.
-func ParseCSV(rawCSV *string, logger *OptionalLogger, retries, timeElapse, timeOut int) (r []*HTTPTest) {
+func ParseCSV(rawCSV *string, logger *log.Logger, retries, timeElapse, timeOut int) (r []*HTTPTest) {
 	tmpClient := new(HTTPTest)
 
 	colCount := 0

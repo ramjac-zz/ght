@@ -24,11 +24,12 @@ func main() {
 	excelFile := flag.String("excel", "", "Path and name of the excel file.")
 	tabs := flag.String("tabs", "", "Tabs to test in the excel file.")
 	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make concurrently (defaults to 1)")
-	verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
+	//verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
 
 	flag.Parse()
-	var logger *ght.OptionalLogger
-	logger.New(verbose)
+	logger := log.New(os.Stdout, "GHT: ", log.Lshortfile)
+	// var logger *ght.OptionalLogger
+	// logger.New(verbose)
 
 	// The documentation implies this is a bad solution
 	runtime.GOMAXPROCS(*parallelism)
@@ -77,8 +78,10 @@ func main() {
 		wg.Add(1)
 
 		go func(v []*ght.HTTPTest) {
+			defer wg.Done()
+
 			for _, h := range v {
-				if !h.TryRequest(ctx, cancel, logger, &wg) {
+				if !h.TryRequest(ctx, cancel, logger) {
 					fm.Lock()
 					failures++
 					failTests = append(failTests, h.Request.URL.String())

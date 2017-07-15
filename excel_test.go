@@ -3,8 +3,11 @@ package ght_test
 import (
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
+
+	"log"
 
 	"github.com/ramjac/ght"
 )
@@ -118,9 +121,9 @@ func TestImportExcel(t *testing.T) {
 	}
 
 	// setup
-	var logger *ght.OptionalLogger
-	b := true
-	logger.New(&b)
+	logger := log.New(os.Stdout, "GHT: ", log.Lshortfile)
+	//b := true
+	//logger.New(&b)
 	path := "godocExample.xlsx"
 	tabs := ""
 

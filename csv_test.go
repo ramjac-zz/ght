@@ -2,8 +2,11 @@ package ght_test
 
 import (
 	"net/http"
+	"os"
 	"regexp"
 	"testing"
+
+	"log"
 
 	"github.com/ramjac/ght"
 )
@@ -85,9 +88,9 @@ func TestParseCSV(t *testing.T) {
 	}
 
 	// setup
-	var logger *ght.OptionalLogger
-	b := true
-	logger.New(&b)
+	logger := log.New(os.Stdout, "GHT: ", log.Lshortfile)
+	// b := true
+	// logger.New(&b)``
 
 	// run tests
 	for _, test := range tests {

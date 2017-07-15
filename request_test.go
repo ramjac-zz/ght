@@ -3,9 +3,10 @@ package ght_test
 import (
 	"context"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"strings"
-	"sync"
 	"testing"
 
 	"github.com/ramjac/ght"
@@ -65,10 +66,9 @@ func TestTryRequest(t *testing.T) {
 	}
 
 	// setup
-	var logger *ght.OptionalLogger
-	b := false
-	logger.New(&b)
-	var wg sync.WaitGroup
+	logger := log.New(os.Stdout, "GHT: ", log.Lshortfile)
+	// b := false
+	// logger.New(&b)
 	// Handle cancellation
 	ctx := context.Background()
 	// trap Ctrl+C and call cancel on the context
@@ -79,8 +79,7 @@ func TestTryRequest(t *testing.T) {
 	for _, rt := range requestTests {
 		t.Logf("Running test %v", rt)
 
-		wg.Add(1)
-		result := rt.input.TryRequest(ctx, cancel, logger, &wg)
+		result := rt.input.TryRequest(ctx, cancel, logger)
 
 		if result != rt.output {
 			t.Errorf(

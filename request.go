@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -20,7 +20,12 @@ type HTTPTest struct {
 	Regex                        *regexp.Regexp
 	ExpectMatch                  bool
 	Retries, TimeElapse, TimeOut int
-	authHeaders                  *http.Header
+	authHeaders                  http.Header
+}
+
+// RequestTester tries a request and checks to see if it suceeded.
+type RequestTester interface {
+	TryRequest(ctx context.Context, cancel func(), logger *log.Logger) bool
 }
 
 // Some basic pretty printing. This could use improvement.
@@ -52,8 +57,7 @@ func AddHTTPTest(t *HTTPTest, r *[]*HTTPTest) {
 }
 
 // TryRequest will attempt an HTTP request as many times as specifie and return true if it reaches a successful response.
-func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *OptionalLogger, wg *sync.WaitGroup) bool {
-	defer wg.Done()
+func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *log.Logger) bool {
 	for tries := 0; tries < h.Retries; tries++ {
 		select {
 		case <-ctx.Done():
@@ -66,14 +70,14 @@ func (h *HTTPTest) TryRequest(ctx context.Context, cancel func(), logger *Option
 	}
 
 	// signal the other go routines to cancel if not in verbose mode
-	if !logger.IsVerbose() {
-		cancel()
-	}
+	//if h.??? {
+	cancel()
+	//}
 
 	return false
 }
 
-func (h *HTTPTest) checkRequest(logger *OptionalLogger) bool {
+func (h *HTTPTest) checkRequest(logger *log.Logger) bool {
 	client := &http.Client{
 		Timeout: (time.Duration)(h.TimeOut) * time.Millisecond,
 	}
@@ -159,7 +163,7 @@ func (h *HTTPTest) Equals(c *HTTPTest) bool {
 
 func (h *HTTPTest) getAuthHeaders(r *http.Response) (header *http.Header) {
 	for k, v := range r.Header {
-		_, found := (*h.authHeaders)[k]
+		_, found := (h.authHeaders)[k]
 		if found {
 			(*header)[k] = v
 		}
@@ -169,7 +173,7 @@ func (h *HTTPTest) getAuthHeaders(r *http.Response) (header *http.Header) {
 }
 
 func (h *HTTPTest) setAuthHeaders() {
-	for k, v := range *h.authHeaders {
+	for k, v := range h.authHeaders {
 		if len(v) > 0 {
 			h.Request.Header[k] = v
 		}

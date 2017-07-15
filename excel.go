@@ -3,6 +3,7 @@ package ght
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -14,7 +15,10 @@ import (
 )
 
 // ImportExcel takes an excel of the correct format and returns a slice of HTTPTest.
-func ImportExcel(fileName, tabsToTest *string, logger *OptionalLogger, retries, timeElapse, timeOut int) (r [][]*HTTPTest) {
+func ImportExcel(
+	fileName, tabsToTest *string,
+	logger *log.Logger,
+	retries, timeElapse, timeOut int) (r [][]*HTTPTest) {
 	xlFile, err := xlsx.OpenFile(*fileName)
 
 	if err != nil {
