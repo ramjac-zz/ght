@@ -2,12 +2,11 @@ package ght_test
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
-
-	"log"
 
 	"github.com/ramjac/ght"
 )
