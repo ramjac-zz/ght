@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"reflect"
 	"regexp"
 	"strings"
@@ -115,11 +116,12 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 	}
 	resp, err := client.Do(h.Request)
 
-	logger.Printf("Test - %v", h)
+	lr, _ := httputil.DumpRequest(h.Request, true)
+	logger.Printf("Test: %s", lr)
 
-	if err == nil &&
-		resp.StatusCode == h.ExpectedStatus {
-		logger.Printf("Response: %v", *resp)
+	if err == nil && resp.StatusCode == h.ExpectedStatus {
+		lr, _ = httputil.DumpResponse(resp, true)
+		logger.Printf("Response: %s", lr)
 
 		if len(h.ExpectedType) > 0 &&
 			!strings.EqualFold(resp.Header.Get("content-type"), h.ExpectedType) {
