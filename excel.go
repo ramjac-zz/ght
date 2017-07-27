@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/dlclark/regexp2"
 	"github.com/tealeg/xlsx"
 )
 
@@ -73,7 +73,7 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 					tmpClient.ExpectedType = strings.TrimSpace(v.Value)
 				case 7:
 					if len(v.Value) > 0 {
-						s, err := regexp.Compile(v.Value)
+						s, err := regexp2.Compile(v.Value, regexp2.Compiled)
 						if err != nil {
 							logger.Printf("Error parsing regular expression: %s\n", err)
 						} else {
