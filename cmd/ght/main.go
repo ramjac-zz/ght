@@ -88,6 +88,7 @@ func main() {
 	wg.Wait()
 
 	// return success/failure
-	logger.Println("Failing tests:", failTests)
+	logger.Println("Failing tests: ", failTests)
+	logger.Println("Failures: ", failures)
 	os.Exit(failures)
 }
