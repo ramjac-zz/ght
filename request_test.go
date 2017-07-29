@@ -13,6 +13,10 @@ import (
 )
 
 func TestTryRequest(t *testing.T) {
+	if os.Getenv("Test_Environment") != "local" {
+		t.Skip("Skipping request testing in non-local environments.")
+	}
+
 	// table of tests
 	// Assumes godoc is running on http://localhost:6060 and go tool tour is also running
 	requestTests := []requestCheck{

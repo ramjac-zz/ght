@@ -3,9 +3,9 @@
 GHT (GHT HTTP Tester) aims to make it easy to create automated HTTP test scripts.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Travis](https://img.shields.io/travis/rust-lang/rust.svg?style=flat-square)](https://travis-ci.org/ramjac/ght)
+[![Travis](https://travis-ci.org/ramjac/ght.svg?branch=master)](https://travis-ci.org/ramjac/ght)
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/ramjac/ght)
-[![Go Report Card](https://goreportcard.com/badge/github.com/ramjac/ght?style=flat-square)](https://goreportcard.com/report/github.com/ramjac/ght)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ramjac/ght)](https://goreportcard.com/report/github.com/ramjac/ght)
 
 ## Installation:
 

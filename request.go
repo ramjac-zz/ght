@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"reflect"
-	"regexp"
 	"strings"
 	"time"
+
+	"github.com/dlclark/regexp2"
 )
 
 // HTTPTest is a request to be tested.
@@ -17,7 +19,7 @@ type HTTPTest struct {
 	Request                      *http.Request
 	ExpectedStatus               int
 	ExpectedType                 string
-	Regex                        *regexp.Regexp
+	Regex                        *regexp2.Regexp
 	ExpectMatch                  bool
 	Retries, TimeElapse, TimeOut int
 	authHeaders                  http.Header
@@ -29,21 +31,58 @@ type RequestTester interface {
 }
 
 // Some basic pretty printing. This could use improvement.
+// func (h *HTTPTest) String() string {
+// 	f := `{ %s %s
+// 	Expected Status: %v
+// 	Expected Type: %s
+// 	Regex: %s
+// 	Should Regex Match: %t }`
+// 	return fmt.Sprintf(
+// 		f,
+// 		h.Request.Method,
+// 		h.Request.URL,
+// 		h.ExpectedStatus,
+// 		h.ExpectedType,
+// 		h.Regex,
+// 		h.ExpectMatch,
+// 	)
+// }
+
+// formatRequest generates ascii representation of a request
 func (h *HTTPTest) String() string {
-	f := `{ %s %s
-	Expected Status: %v
-	Expected Type: %s
-	Regex: %s
-	Should Regex Match: %t }`
-	return fmt.Sprintf(
-		f,
-		h.Request.Method,
-		h.Request.URL,
-		h.ExpectedStatus,
-		h.ExpectedType,
-		h.Regex,
-		h.ExpectMatch,
-	)
+	// Create return string
+	var request []string
+
+	// Add the request string
+	url := fmt.Sprintf("%v %v %v", h.Request.Method, h.Request.URL, h.Request.Proto)
+	request = append(request, url)
+
+	// Add the host
+	request = append(request, fmt.Sprintf("Host: %v", h.Request.Host))
+
+	// Loop through headers
+	for name, headers := range h.Request.Header {
+		name = strings.ToLower(name)
+		for _, h := range headers {
+			request = append(request, fmt.Sprintf("%v: %v", name, h))
+		}
+	}
+
+	// If this is a POST, add post data
+	if h.Request.Method == "POST" {
+		h.Request.ParseForm()
+		request = append(request, "\n")
+		request = append(request, h.Request.Form.Encode())
+	}
+
+	// Add the expected response info
+	request = append(request, fmt.Sprintf("Expected Status: %v", h.ExpectedStatus))
+	request = append(request, fmt.Sprintf("ExpectedType: %v", h.ExpectedType))
+	request = append(request, fmt.Sprintf("Regex: %v", h.Regex))
+	request = append(request, fmt.Sprintf("Expect Match: %v", h.ExpectMatch))
+
+	// Return the request as a string
+	return strings.Join(request, "\n")
 }
 
 // AddHTTPTest appends an HTTPTest to the given slice.
@@ -83,11 +122,12 @@ func (h *HTTPTest) checkRequest(logger *log.Logger) bool {
 	}
 	resp, err := client.Do(h.Request)
 
-	logger.Printf("Test - %v", h)
+	lr, _ := httputil.DumpRequest(h.Request, true)
+	logger.Printf("Test: %s", lr)
 
-	if err == nil &&
-		resp.StatusCode == h.ExpectedStatus {
-		logger.Printf("Response: %v", *resp)
+	if err == nil && resp.StatusCode == h.ExpectedStatus {
+		lr, _ = httputil.DumpResponse(resp, true)
+		logger.Printf("Response: %s", lr)
 
 		if len(h.ExpectedType) > 0 &&
 			!strings.EqualFold(resp.Header.Get("content-type"), h.ExpectedType) {
@@ -102,9 +142,9 @@ func (h *HTTPTest) checkRequest(logger *log.Logger) bool {
 				return false
 			}
 
-			m := h.Regex.MatchString(string(tmp[:]))
+			m, err := h.Regex.MatchString(string(tmp[:]))
 
-			if m != h.ExpectMatch {
+			if m != h.ExpectMatch || err != nil {
 				return false
 			}
 		}

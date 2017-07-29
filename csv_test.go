@@ -1,13 +1,12 @@
 package ght_test
 
 import (
+	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"testing"
 
-	"log"
-
+	"github.com/dlclark/regexp2"
 	"github.com/ramjac/ght"
 )
 
@@ -77,7 +76,7 @@ func TestParseCSV(t *testing.T) {
 						},
 					},
 					ExpectedStatus: 200,
-					Regex:          regexp.MustCompile("Goblet"),
+					Regex:          regexp2.MustCompile("Goblet", regexp2.Compiled),
 					ExpectMatch:    true,
 					Retries:        1,
 					TimeElapse:     1,

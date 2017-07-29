@@ -4,9 +4,10 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/dlclark/regexp2"
 )
 
 // ParseCSV takes a csv of the correct format and returns a slice of HTTPTest.
@@ -45,7 +46,7 @@ func ParseCSV(rawCSV *string, logger *log.Logger, retries, timeElapse, timeOut i
 			tmpClient.ExpectedType = v
 		case 4:
 			if len(v) > 0 {
-				s, err := regexp.Compile(v)
+				s, err := regexp2.Compile(v, regexp2.Compiled)
 				if err != nil {
 					logger.Printf("Error parsing regular expression: %s\n", err)
 				} else {
