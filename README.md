@@ -41,7 +41,8 @@ https://regex-golang.appspot.com/assets/html/index.html
 * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
 * Improve verbose output
     * The verbose output should summarize what failed. There is a summary, but this could be more helpful.
-    * The HTTP request and response should pretty print
+    * Failures should state what failed
+    * Add colors for easier reading (https://github.com/fatih/color)
 * Fix a minor bug where spreadsheet rows that lack retries/time elapse/timeout fail to run
 * Add some kind of authentication flow
     * Allow for "Set-Cookie" in a response to set the Cookies of future requests
