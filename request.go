@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"reflect"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/dlclark/regexp2"
 )
 
 // HTTPTest is a request to be tested.
@@ -18,7 +19,7 @@ type HTTPTest struct {
 	Request                      *http.Request
 	ExpectedStatus               int
 	ExpectedType                 string
-	Regex                        *regexp.Regexp
+	Regex                        *regexp2.Regexp
 	ExpectMatch                  bool
 	Retries, TimeElapse, TimeOut int
 }
@@ -136,9 +137,9 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 				return false
 			}
 
-			m := h.Regex.MatchString(string(tmp[:]))
+			m, err := h.Regex.MatchString(string(tmp[:]))
 
-			if m != h.ExpectMatch {
+			if m != h.ExpectMatch || err != nil {
 				return false
 			}
 		}
