@@ -27,9 +27,11 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 TabLoop:
 	for _, tab := range xlFile.Sheets {
 		// here is where we could check to see that the specified tab is one that was listed.
-		for _, testName := range testTabs {
-			if !strings.EqualFold(testName, tab.Name) {
-				continue TabLoop
+		if len(*tabsToTest) > 0 {
+			for _, testName := range testTabs {
+				if !strings.EqualFold(testName, tab.Name) {
+					continue TabLoop
+				}
 			}
 		}
 

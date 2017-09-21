@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/ramjac/ght"
 )
 
@@ -50,6 +51,7 @@ func main() {
 	var wg sync.WaitGroup
 	var fm sync.Mutex
 	var failures int
+	var successes int
 	var failTests []string
 
 	// Handle cancellation
@@ -76,7 +78,11 @@ func main() {
 		wg.Add(1)
 
 		go func(v *ght.HTTPTest) {
-			if !v.TryRequest(ctx, cancel, logger, &wg) {
+			if v.TryRequest(ctx, cancel, logger, &wg) {
+				fm.Lock()
+				successes++
+				fm.Unlock()
+			} else {
 				fm.Lock()
 				failures++
 				failTests = append(failTests, v.Request.URL.String())
@@ -88,7 +94,10 @@ func main() {
 	wg.Wait()
 
 	// return success/failure
-	logger.Println("Failing tests: ", failTests)
-	logger.Println("Failures: ", failures)
+	color.Blue("Total: %d", len(r))
+	color.Green("Passing: %d", successes)
+	color.Red("Failures: %d", failures)
+	color.Red("Failing tests: %v", failTests)
+
 	os.Exit(failures)
 }
