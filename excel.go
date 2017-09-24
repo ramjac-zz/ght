@@ -47,13 +47,15 @@ TabLoop:
 				}
 
 				switch k {
-				case 1:
+				case 0:
 					tmpClient.Request = new(http.Request)
 
 					// need to move this to new columns
 					tmpClient.Retries = retries
 					tmpClient.TimeElapse = timeElapse
 
+					tmpClient.Label = v.Value
+				case 1:
 					u, err := url.Parse(v.Value)
 					if err == nil {
 						tmpClient.Request.URL = u

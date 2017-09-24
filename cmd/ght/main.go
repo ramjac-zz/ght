@@ -24,7 +24,7 @@ func main() {
 	jsonFile := flag.String("json", "", "Path and name of the json request file.")
 	excelFile := flag.String("excel", "", "Path and name of the excel file.")
 	tabs := flag.String("tabs", "", "Tabs to test in the excel file.")
-	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make concurrently (defaults to 1)")
+	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make in parallel (defaults to 1)")
 	verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
 
 	flag.Parse()
@@ -83,9 +83,14 @@ func main() {
 				successes++
 				fm.Unlock()
 			} else {
+				name := v.Request.URL.String()
+				if len(v.Label) > 0 {
+					name = `"` + v.Label + `"`
+				}
+
 				fm.Lock()
 				failures++
-				failTests = append(failTests, v.Request.URL.String())
+				failTests = append(failTests, name)
 				fm.Unlock()
 			}
 		}(v)

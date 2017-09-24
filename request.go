@@ -16,6 +16,7 @@ import (
 
 // HTTPTest is a request to be tested.
 type HTTPTest struct {
+	Label                        string
 	Request                      *http.Request
 	ExpectedStatus               int
 	ExpectedType                 string
