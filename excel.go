@@ -54,7 +54,7 @@ TabLoop:
 					tmpClient.Retries = retries
 					tmpClient.TimeElapse = timeElapse
 
-					tmpClient.Label = v.Value
+					tmpClient.Label = `"` + v.Value + `"`
 				case 1:
 					u, err := url.Parse(v.Value)
 					if err == nil {
@@ -120,14 +120,26 @@ TabLoop:
 						tmpClient.TimeOut = timeOut
 						logger.Printf("Error parsing time elapse: %s\n", err)
 					}
-
-					AddHTTPTest(tmpClient, &r)
-
-					tmpClient = new(HTTPTest)
-
-					continue
 				}
 			}
+
+			// set defaults if no value is provided
+			if tmpClient.Retries < 1 {
+				tmpClient.Retries = retries
+			}
+
+			if tmpClient.TimeElapse < 1 {
+				tmpClient.TimeElapse = timeElapse
+			}
+
+			if tmpClient.TimeOut < 1 {
+				tmpClient.TimeOut = timeOut
+			}
+
+			if tmpClient.Request != nil {
+				AddHTTPTest(tmpClient, &r)
+			}
+			tmpClient = new(HTTPTest)
 		}
 	}
 	return r

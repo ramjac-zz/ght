@@ -119,7 +119,7 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 	resp, err := client.Do(h.Request)
 
 	lr, _ := httputil.DumpRequest(h.Request, true)
-	logger.Printf("Test: %s", lr)
+	logger.Printf("Test: %s %s", h.Label, lr)
 
 	if err == nil && resp.StatusCode == h.ExpectedStatus {
 		lr, _ = httputil.DumpResponse(resp, true)

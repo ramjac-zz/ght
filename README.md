@@ -41,7 +41,6 @@ https://regex-golang.appspot.com/assets/html/index.html
 * Improve verbose output
     * Failures should state the nature of the failure
     * Add colors for easier reading (https://github.com/fatih/color) - done in the summary. I'd like the running tests in verbose mode to also be colored according to the type of result.
-* Fix a minor bug where spreadsheet rows that lack retries/time elapse/timeout fail to run
 * Add some kind of authentication flow
     * Allow for "Set-Cookie" in a response to set the Cookies of future requests
     * Use the "token: ..." in response to set the "Authorization: " header of future requests

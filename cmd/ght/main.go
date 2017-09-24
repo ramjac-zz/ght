@@ -85,7 +85,7 @@ func main() {
 			} else {
 				name := v.Request.URL.String()
 				if len(v.Label) > 0 {
-					name = `"` + v.Label + `"`
+					name = v.Label
 				}
 
 				fm.Lock()
