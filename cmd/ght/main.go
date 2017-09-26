@@ -99,10 +99,13 @@ func main() {
 	wg.Wait()
 
 	// return success/failure
-	color.Blue("Total: %d", len(r))
-	color.Green("Passing: %d", successes)
-	color.Red("Failures: %d", failures)
-	color.Red("Failing tests: %v", failTests)
+	logger.SetColor(color.FgBlue)
+	logger.Printf("\nTotal: %d\n", len(r))
+	logger.SetColor(color.FgGreen)
+	logger.Printf("Passing: %d\n", successes)
+	logger.SetColor(color.FgRed)
+	logger.Printf("Failures: %d\n", failures)
+	logger.Printf("Failing tests: %v\n", failTests)
 
 	os.Exit(failures)
 }

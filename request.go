@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dlclark/regexp2"
+	"github.com/fatih/color"
 )
 
 // HTTPTest is a request to be tested.
@@ -119,11 +120,13 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 	resp, err := client.Do(h.Request)
 
 	lr, _ := httputil.DumpRequest(h.Request, true)
-	logger.Printf("Test: %s %s", h.Label, lr)
+	logger.SetColor(color.FgBlue)
+	logger.Printf("Test: %s %s\n", h.Label, lr)
 
 	if err == nil && resp.StatusCode == h.ExpectedStatus {
 		lr, _ = httputil.DumpResponse(resp, true)
-		logger.Printf("Response: %s", lr)
+		logger.SetColor(color.FgWhite)
+		logger.Printf("Response: %s\n", lr)
 
 		if len(h.ExpectedType) > 0 &&
 			!strings.EqualFold(resp.Header.Get("content-type"), h.ExpectedType) {
@@ -134,7 +137,7 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 			tmp, err := ioutil.ReadAll(resp.Body)
 			resp.Body.Close()
 			if err != nil {
-				logger.Printf("Body could not be read: %v", err)
+				logger.Printf("Body could not be read: %v\n", err)
 				return false
 			}
 
@@ -144,6 +147,7 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 				return false
 			}
 		}
+
 		return true
 	}
 
