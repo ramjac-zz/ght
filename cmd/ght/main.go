@@ -26,6 +26,7 @@ func main() {
 	tabs := flag.String("tabs", "", "Tabs to test in the excel file.")
 	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make in parallel (defaults to 1)")
 	verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
+	noFail := flag.Bool("no-fail", false, "Always writes a return code of 0. Useful on poorly designed operating systems.")
 
 	flag.Parse()
 	var logger *ght.VerboseLogger
@@ -99,13 +100,19 @@ func main() {
 	wg.Wait()
 
 	// return success/failure
-	logger.SetColor(color.FgBlue)
+	logger.SetColor(color.FgHiBlue)
 	logger.Printf("\nTotal: %d\n", len(r))
-	logger.SetColor(color.FgGreen)
+	logger.SetColor(color.FgHiGreen)
 	logger.Printf("Passing: %d\n", successes)
-	logger.SetColor(color.FgRed)
+	logger.SetColor(color.FgHiRed)
 	logger.Printf("Failures: %d\n", failures)
 	logger.Printf("Failing tests: %v\n", failTests)
 
+	if *noFail {
+		logger.SetColor(color.FgWhite)
+		logger.Println(failures)
+
+		os.Exit(0)
+	}
 	os.Exit(failures)
 }

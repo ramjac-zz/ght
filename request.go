@@ -120,7 +120,7 @@ func (h *HTTPTest) checkRequest(logger *VerboseLogger) bool {
 	resp, err := client.Do(h.Request)
 
 	lr, _ := httputil.DumpRequest(h.Request, true)
-	logger.SetColor(color.FgBlue)
+	logger.SetColor(color.FgHiBlue)
 	logger.Printf("Test: %s %s\n", h.Label, lr)
 
 	if err == nil && resp.StatusCode == h.ExpectedStatus {
