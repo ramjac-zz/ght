@@ -3,9 +3,9 @@
 GHT (GHT HTTP Tester) aims to make it easy to create automated HTTP test scripts.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Travis](https://img.shields.io/travis/rust-lang/rust.svg?style=flat-square)](https://travis-ci.org/ramjac/ght)
+[![Travis](https://travis-ci.org/ramjac/ght.svg?branch=master)](https://travis-ci.org/ramjac/ght)
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/ramjac/ght)
-[![Go Report Card](https://goreportcard.com/badge/github.com/ramjac/ght?style=flat-square)](https://goreportcard.com/report/github.com/ramjac/ght)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ramjac/ght)](https://goreportcard.com/report/github.com/ramjac/ght)
 
 ## Installation:
 
@@ -37,12 +37,10 @@ https://regex-golang.appspot.com/assets/html/index.html
 
 ## TODO
 
-* Remove time.Sleep from TryRequest
 * Allow for a JSON file input of whose schema is based on an array of the HTTPTest struct
 * Improve verbose output
-    * The verbose output should summarize what failed. There is a summary, but this could be more helpful.
-    * The HTTP request and response should pretty print
-* Fix a minor bug where spreadsheet rows that lack retries/time elapse/timeout fail to run
+    * Failures should state the nature of the failure
+    * Add colors for easier reading (https://github.com/fatih/color) - done in the summary. I'd like the running tests in verbose mode to also be colored according to the type of result.
 * Add some kind of authentication flow
     * Allow for "Set-Cookie" in a response to set the Cookies of future requests
     * Use the "token: ..." in response to set the "Authorization: " header of future requests

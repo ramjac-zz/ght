@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/ramjac/ght"
 )
 
@@ -23,7 +24,7 @@ func main() {
 	jsonFile := flag.String("json", "", "Path and name of the json request file.")
 	excelFile := flag.String("excel", "", "Path and name of the excel file.")
 	tabs := flag.String("tabs", "", "Tabs to test in the excel file.")
-	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make concurrently (defaults to 1)")
+	parallelism := flag.Int("p", runtime.NumCPU(), "Number of requests to make in parallel (defaults to 1)")
 	verbose := flag.Bool("v", false, "Prints resutls of each step. Also causes all tests to execute instead of returning after the first failure.")
 
 	flag.Parse()
@@ -50,6 +51,7 @@ func main() {
 	var wg sync.WaitGroup
 	var fm sync.Mutex
 	var failures int
+	var successes int
 	var failTests []string
 
 	// Handle cancellation
@@ -76,10 +78,19 @@ func main() {
 		wg.Add(1)
 
 		go func(v *ght.HTTPTest) {
-			if !v.TryRequest(ctx, cancel, logger, &wg) {
+			if v.TryRequest(ctx, cancel, logger, &wg) {
+				fm.Lock()
+				successes++
+				fm.Unlock()
+			} else {
+				name := v.Request.URL.String()
+				if len(v.Label) > 0 {
+					name = v.Label
+				}
+
 				fm.Lock()
 				failures++
-				failTests = append(failTests, v.Request.URL.String())
+				failTests = append(failTests, name)
 				fm.Unlock()
 			}
 		}(v)
@@ -88,6 +99,13 @@ func main() {
 	wg.Wait()
 
 	// return success/failure
-	logger.Println("Failing tests:", failTests)
+	logger.SetColor(color.FgBlue)
+	logger.Printf("\nTotal: %d\n", len(r))
+	logger.SetColor(color.FgGreen)
+	logger.Printf("Passing: %d\n", successes)
+	logger.SetColor(color.FgRed)
+	logger.Printf("Failures: %d\n", failures)
+	logger.Printf("Failing tests: %v\n", failTests)
+
 	os.Exit(failures)
 }

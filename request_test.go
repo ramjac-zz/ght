@@ -4,11 +4,10 @@ import (
 	"context"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"testing"
-
-	"os"
 
 	"github.com/ramjac/ght"
 )
@@ -72,7 +71,7 @@ func TestTryRequest(t *testing.T) {
 
 	// setup
 	var logger *ght.VerboseLogger
-	b := false
+	b := true
 	logger.New(&b)
 	var wg sync.WaitGroup
 	// Handle cancellation

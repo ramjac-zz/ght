@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/dlclark/regexp2"
 	"github.com/tealeg/xlsx"
 )
 
@@ -22,11 +22,16 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 		os.Exit(1)
 	}
 
+	testTabs := strings.Split(*tabsToTest, ",")
+
+TabLoop:
 	for _, tab := range xlFile.Sheets {
 		// here is where we could check to see that the specified tab is one that was listed.
 		if len(*tabsToTest) > 0 {
-			if !strings.Contains(*tabsToTest, tab.Name) {
-				continue
+			for _, testName := range testTabs {
+				if !strings.EqualFold(testName, tab.Name) {
+					continue TabLoop
+				}
 			}
 		}
 
@@ -42,13 +47,15 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 				}
 
 				switch k {
-				case 1:
+				case 0:
 					tmpClient.Request = new(http.Request)
 
 					// need to move this to new columns
 					tmpClient.Retries = retries
 					tmpClient.TimeElapse = timeElapse
 
+					tmpClient.Label = `"` + v.Value + `"`
+				case 1:
 					u, err := url.Parse(v.Value)
 					if err == nil {
 						tmpClient.Request.URL = u
@@ -73,7 +80,7 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 					tmpClient.ExpectedType = strings.TrimSpace(v.Value)
 				case 7:
 					if len(v.Value) > 0 {
-						s, err := regexp.Compile(v.Value)
+						s, err := regexp2.Compile(v.Value, regexp2.Compiled)
 						if err != nil {
 							logger.Printf("Error parsing regular expression: %s\n", err)
 						} else {
@@ -113,14 +120,26 @@ func ImportExcel(fileName, tabsToTest *string, logger *VerboseLogger, retries, t
 						tmpClient.TimeOut = timeOut
 						logger.Printf("Error parsing time elapse: %s\n", err)
 					}
-
-					AddHTTPTest(tmpClient, &r)
-
-					tmpClient = new(HTTPTest)
-
-					continue
 				}
 			}
+
+			// set defaults if no value is provided
+			if tmpClient.Retries < 1 {
+				tmpClient.Retries = retries
+			}
+
+			if tmpClient.TimeElapse < 1 {
+				tmpClient.TimeElapse = timeElapse
+			}
+
+			if tmpClient.TimeOut < 1 {
+				tmpClient.TimeOut = timeOut
+			}
+
+			if tmpClient.Request != nil {
+				AddHTTPTest(tmpClient, &r)
+			}
+			tmpClient = new(HTTPTest)
 		}
 	}
 	return r
