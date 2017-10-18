@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -45,7 +46,7 @@ func main() {
 	case len(*rawCsv) > 0:
 		r = ght.ParseCSV(rawCsv, logger, *retries, *timeElapse, *timeOut)
 	default:
-		log.Fatal("An excel, JSON, or CSV input is required")
+		log.Fatal("GHT version 0.6.0\nAn excel, JSON, or CSV input is required")
 	}
 
 	// make HTTP requests
@@ -110,7 +111,7 @@ func main() {
 
 	if *noFail {
 		logger.SetColor(color.FgWhite)
-		logger.Println(failures)
+		fmt.Println(failures)
 
 		os.Exit(0)
 	}
